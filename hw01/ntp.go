@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/beevik/ntp"
 	"log"
 	"time"
+
+	"github.com/beevik/ntp"
 )
 
-func main(){
+func main() {
 	response, err := ntp.Query("0.beevik-ntp.pool.ntp.org")
 	if err != nil {
 		log.Fatalln("ntp.QueryWithOptions() error: " + err.Error())
