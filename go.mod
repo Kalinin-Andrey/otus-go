@@ -1,4 +1,4 @@
-module github.com/Kalinin-Andrey/otus-go
+module github.com/Kalinin-Andrey/otus-go/hw01
 
 go 1.13
 
