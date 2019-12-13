@@ -1,4 +1,4 @@
-package main
+package hw02
 
 import (
 	"fmt"
