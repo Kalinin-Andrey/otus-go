@@ -9,7 +9,7 @@ func SimpleUnpackString( code string ) (string, error) {
 	var res string
 	codeRunes := []rune(code)
 
-	for i:=0; i < len(codeRunes); i++ {
+	for i := 0; i < len(codeRunes); i++ {
 		var s string
 
 		if ('a' <= codeRunes[i] && codeRunes[i] <= 'z') || ('A' <= codeRunes[i] && codeRunes[i] <= 'Z') {
@@ -21,9 +21,11 @@ func SimpleUnpackString( code string ) (string, error) {
 			return "", fmt.Errorf("Symbol N%v must be a valid letter, \"%v\" was givven.", i, codeRunes[i])
 		}
 		n := 1
-		if ('0' <= codeRunes[i + 1] && codeRunes[i + 1] <= '9') {
-			n = int(codeRunes[i + 1])
-			i++
+		if i + 1 < len(codeRunes) {
+			if '0' <= codeRunes[i + 1] && codeRunes[i + 1] <= '9' {
+				n = int(codeRunes[i + 1])
+				i++
+			}
 		}
 		res += strings.Repeat(s, n)
 	}
