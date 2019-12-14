@@ -23,7 +23,7 @@ func SimpleUnpackString( code string ) (string, error) {
 		n := 1
 		if i + 1 < len(codeRunes) {
 			if '0' <= codeRunes[i + 1] && codeRunes[i + 1] <= '9' {
-				n = int(codeRunes[i + 1])
+				n = int(codeRunes[i + 1] - '0')
 				i++
 			}
 		}
