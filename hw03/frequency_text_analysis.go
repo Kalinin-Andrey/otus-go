@@ -6,47 +6,50 @@ import (
 	"unicode"
 )
 
+const (
+	StartCap			= 20
+	DefaultResultLength	= 10
+	)
+
+type WordsCount struct {
+	word string
+	count int
+}
+
 // Returns sorted top 10 words with max frequency for a given text
 func frequencyTextAnalysis(text string) (res []string) {
-	frequenciesByWords := make(map[string]int, 20)
-	wordsByFrequencies := make(map[int][]string, 20)
-	frequencies := make([]int, 0, 20)
+	frequenciesByWords := make(map[string]int, StartCap)
+	wc := make([]WordsCount, 0, StartCap)
 
 	text = cleanAndLowText(text)
 	words := strings.Fields(text)
 
 	for _, word := range words {
-		if _, ok := frequenciesByWords[word]; !ok {
-			frequenciesByWords[word] = 1
-		} else {
-			frequenciesByWords[word]++
+
+		if frequenciesByWords[word] == 0 {
+			wc = append(wc, WordsCount{
+				word: word,
+			})
 		}
+		frequenciesByWords[word]++
 	}
 
-	for word, count := range frequenciesByWords {
-		wordsByFrequencies[count] = append(wordsByFrequencies[count], word)
+	for _, wordsCount := range wc {
+		wordsCount.count = frequenciesByWords[wordsCount.word]
 	}
 
-	for count := range wordsByFrequencies {
-		frequencies = append(frequencies, count)
-	}
-
-	sort.Slice(frequencies, func(i, j int) bool {
-		return frequencies[i] > frequencies[j]
+	sort.SliceStable(wc, func(i, j int) bool {
+		return wc[i].count < wc[j].count
 	})
 
-	for _, count := range frequencies {
-		res = append(res, wordsByFrequencies[count]...)
-
-		if len(res) >= 10 {
-			break
-		}
+	resultLen := DefaultResultLength
+	if resultLen > len(wc) {
+		resultLen = len(wc)
 	}
 
-	if len(res) > 10 {
-		res = res[:10]
+	for _, wordsCount := range wc[:resultLen] {
+		res = append(res, wordsCount.word)
 	}
-	sort.Strings(res)
 
 	return res
 }
