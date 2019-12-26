@@ -4,21 +4,6 @@ import (
 
 )
 
-type IList interface {
-	Len()   uint
-	First() IItem
-	Last()  IItem
-	PushFront(v interface{})
-	PushBack(v interface{})
-	Remove(i Item)
-}
-
-type IItem interface {
-	Value() interface{}
-	Next() *Item
-	Prev() *Item
-}
-
 type List struct {
 	len     uint
 	first   *Item

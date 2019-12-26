@@ -42,7 +42,7 @@ func TestPushFront(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	TestPushFront(t)
+	//TestPushFront(t)
 	rmCount := 5
 	i := 0
 
@@ -62,7 +62,7 @@ func TestRemove(t *testing.T) {
 			t.Errorf("Значение элемента не совпадает с ожидаемым. Ожидали %v ; Получили %v", TestItemsInts[i], item.Value())
 		}
 
-		if i-1 >= 0 && item.Prev().Value() != TestItemsInts[i-1] {
+		if i-1-rmCount >= 0 && item.Prev().Value() != TestItemsInts[i-1] {
 			t.Errorf("Значение предыдущего элемента не совпадает с ожидаемым. Ожидали %v ; Получили %v", TestItemsInts[i-1], item.Prev().Value())
 		}
 
