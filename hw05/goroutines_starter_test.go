@@ -1,15 +1,16 @@
 package hw05
 
-import(
+import (
 	"errors"
+	"log"
 	"testing"
 	"time"
 )
 
-var NumberOfFuncs int 		= 30
-var TimeOfFunc int			= 2 // sec.
-var NumberOfGoroutines int	= 10
-var QuoteOfErrors int		= 3
+var NumberOfFuncs int = 30
+var TimeOfFunc int = 2 // sec.
+var NumberOfGoroutines int = 10
+var QuoteOfErrors int = 3
 
 func funcWithError() error {
 	time.Sleep(time.Duration(TimeOfFunc) * time.Second)
@@ -19,6 +20,12 @@ func funcWithError() error {
 func funcWithoutError() error {
 	time.Sleep(10 * time.Second)
 	return nil
+}
+
+func funcWithPanic() error {
+	log.Panic("Panic!")
+	panic("A am panic!")
+	//panic(errors.New("A am panic!"))
 }
 
 func TestRunPositive(t *testing.T) {
@@ -62,7 +69,7 @@ func TestRunNegative(t *testing.T) {
 		funcsSlice = append(funcsSlice, functionFail)
 	}
 
-	for i := 0; i < NumberOfFuncs - QuoteOfErrors; i++ {
+	for i := 0; i < NumberOfFuncs-QuoteOfErrors; i++ {
 		funcsSlice = append(funcsSlice, function)
 	}
 	err := Run(funcsSlice, NumberOfGoroutines, QuoteOfErrors)
@@ -71,8 +78,40 @@ func TestRunNegative(t *testing.T) {
 		t.Error("Result must be negative")
 	}
 
-	if len(countOfFuncsChannel) > QuoteOfErrors + NumberOfGoroutines {
-		t.Errorf("Count of executed funcs is %v, expected <= %v", len(countOfFuncsChannel), QuoteOfErrors + NumberOfGoroutines)
+	if len(countOfFuncsChannel) > QuoteOfErrors+NumberOfGoroutines {
+		t.Errorf("Count of executed funcs is %v, expected <= %v", len(countOfFuncsChannel), QuoteOfErrors+NumberOfGoroutines)
 	}
 }
 
+
+func TestRunWithPanics(t *testing.T) {
+	funcsSlice := make([]func() error, 0, NumberOfFuncs)
+	countOfFuncsChannel := make(chan struct{}, NumberOfFuncs)
+
+	function := func() error {
+		countOfFuncsChannel <- struct{}{}
+		return funcWithoutError()
+	}
+
+	functionFail := func() error {
+		countOfFuncsChannel <- struct{}{}
+		return funcWithPanic()
+	}
+
+	for i := 0; i < QuoteOfErrors; i++ {
+		funcsSlice = append(funcsSlice, functionFail)
+	}
+
+	for i := 0; i < NumberOfFuncs-QuoteOfErrors; i++ {
+		funcsSlice = append(funcsSlice, function)
+	}
+	err := Run(funcsSlice, NumberOfGoroutines, QuoteOfErrors)
+
+	if err == nil {
+		t.Error("Result must be negative")
+	}
+
+	if len(countOfFuncsChannel) > QuoteOfErrors+NumberOfGoroutines {
+		t.Errorf("Count of executed funcs is %v, expected <= %v", len(countOfFuncsChannel), QuoteOfErrors+NumberOfGoroutines)
+	}
+}

@@ -6,7 +6,7 @@ import (
 	"unicode"
 )
 
-func SimpleUnpackString( code string ) (string, error) {
+func SimpleUnpackString(code string) (string, error) {
 	var b strings.Builder
 	codeRunes := []rune(code)
 
@@ -24,9 +24,9 @@ func SimpleUnpackString( code string ) (string, error) {
 		}
 		n := 1
 
-		if i + 1 < len(codeRunes) {
-			if unicode.IsDigit(codeRunes[i + 1]) {
-				n = int(codeRunes[i + 1] - '0')
+		if i+1 < len(codeRunes) {
+			if unicode.IsDigit(codeRunes[i+1]) {
+				n = int(codeRunes[i+1] - '0')
 				i++
 			}
 		}

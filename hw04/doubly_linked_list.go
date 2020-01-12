@@ -1,8 +1,6 @@
 package hw04
 
-import (
-
-)
+import ()
 
 // List of Items
 type List struct {
@@ -14,13 +12,13 @@ type List struct {
 
 // Item of the List
 type Item struct {
-	val         interface{}
-	next        *Item
-	prev        *Item
+	val  interface{}
+	next *Item
+	prev *Item
 }
 
 // New object of the List (constructor)
-func New() *List{
+func New() *List {
 	return &List{}
 }
 
@@ -57,7 +55,7 @@ func (l *List) Last() *Item {
 // PushFront is the method for a pushing into front of a List object
 func (l *List) PushFront(v interface{}) {
 	item := &Item{
-		val:    v,
+		val: v,
 	}
 
 	if l.first != nil {
@@ -75,7 +73,7 @@ func (l *List) PushFront(v interface{}) {
 // PushBack is the method for a pushing into back of a List object
 func (l *List) PushBack(v interface{}) {
 	item := &Item{
-		val:    v,
+		val: v,
 	}
 
 	if l.last != nil {

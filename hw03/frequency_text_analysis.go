@@ -7,12 +7,12 @@ import (
 )
 
 const (
-	StartCap			= 20
-	DefaultResultLength	= 10
-	)
+	StartCap            = 20
+	DefaultResultLength = 10
+)
 
 type WordsCount struct {
-	word string
+	word  string
 	count int
 }
 

@@ -6,35 +6,35 @@ import (
 )
 
 type TestCase struct {
-	In string
-	Out string
+	In      string
+	Out     string
 	IsError bool
 }
 
 var TestCases []TestCase = []TestCase{
 	TestCase{
-		In: "a4bc2d5e",
+		In:  "a4bc2d5e",
 		Out: "aaaabccddddde",
 	},
 	TestCase{
-		In: "abcd",
+		In:  "abcd",
 		Out: "abcd",
 	},
 	TestCase{
-		In: "45",
-		Out: "",
+		In:      "45",
+		Out:     "",
 		IsError: true,
 	},
 	TestCase{
-		In: `qwe\4\5`,
+		In:  `qwe\4\5`,
 		Out: "qwe45",
 	},
 	TestCase{
-		In: `qwe\45`,
+		In:  `qwe\45`,
 		Out: "qwe44444",
 	},
 	TestCase{
-		In: `qwe\\5`,
+		In:  `qwe\\5`,
 		Out: `qwe\\\\\`,
 	},
 }

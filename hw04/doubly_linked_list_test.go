@@ -24,7 +24,7 @@ func TestPushFront(t *testing.T) {
 	}
 	i := 0
 
-	for item, isEnd := list.NextItem(); !isEnd; item, isEnd = list.NextItem(){
+	for item, isEnd := list.NextItem(); !isEnd; item, isEnd = list.NextItem() {
 
 		if item.Value() != TestItemsInts[i] {
 			t.Errorf("Значение элемента не совпадает с ожидаемым. Ожидали %v ; Получили %v", TestItemsInts[i], item.Value())
@@ -46,17 +46,17 @@ func TestRemove(t *testing.T) {
 	rmCount := 5
 	i := 0
 
-	for currentItem := list.First(); i < rmCount; i++  {
+	for currentItem := list.First(); i < rmCount; i++ {
 		list.Remove(*currentItem)
 		currentItem = currentItem.Next()
 	}
 	j := i
 
-	if int(list.Len()) != len(TestItemsInts) - rmCount {
-		t.Errorf("Длина списка не совпадает с ожидаемым. Ожидали %v ; Получили %v", len(TestItemsInts) - rmCount, list.Len())
+	if int(list.Len()) != len(TestItemsInts)-rmCount {
+		t.Errorf("Длина списка не совпадает с ожидаемым. Ожидали %v ; Получили %v", len(TestItemsInts)-rmCount, list.Len())
 	}
 
-	for item, isEnd := list.NextItem(); !isEnd; item, isEnd = list.NextItem(){
+	for item, isEnd := list.NextItem(); !isEnd; item, isEnd = list.NextItem() {
 
 		if item.Value() != TestItemsInts[i] {
 			t.Errorf("Значение элемента не совпадает с ожидаемым. Ожидали %v ; Получили %v", TestItemsInts[i], item.Value())
@@ -72,13 +72,13 @@ func TestRemove(t *testing.T) {
 		i++
 	}
 
-	for currentItem := list.First(); j < len(TestItemsInts); j++  {
+	for currentItem := list.First(); j < len(TestItemsInts); j++ {
 		list.Remove(*currentItem)
 		currentItem = currentItem.Next()
 	}
 
 	if int(list.Len()) != 0 {
-		t.Errorf("Длина списка не совпадает с ожидаемым. Ожидали %v ; Получили %v", len(TestItemsInts) - rmCount, list.Len())
+		t.Errorf("Длина списка не совпадает с ожидаемым. Ожидали %v ; Получили %v", len(TestItemsInts)-rmCount, list.Len())
 	}
 
 	if list.First() != nil {
@@ -102,7 +102,7 @@ func TestPushBack(t *testing.T) {
 	}
 	i := 0
 
-	for item, isEnd := list.NextItem(); !isEnd; item, isEnd = list.NextItem(){
+	for item, isEnd := list.NextItem(); !isEnd; item, isEnd = list.NextItem() {
 
 		if item.Value() != TestItemsStrs[i] {
 			t.Errorf("Значение элемента не совпадает с ожидаемым. Ожидали %v ; Получили %v", TestItemsStrs[i], item.Value())

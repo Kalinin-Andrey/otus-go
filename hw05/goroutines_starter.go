@@ -8,25 +8,18 @@ import (
 	"sync"
 )
 
-// GoroutineData is data for goroutine starting
-type GoroutineData struct{
-	TasksChannel       chan func()error
-	IfNeed2StartChannel chan struct{}
-	ErrorsChannel       chan error
-	WaitGroup          *sync.WaitGroup
-}
-
-func stoperByErrorsQuote(ctx context.Context, errorsCh chan error, errorsQuota uint) (errorsLimit chan struct{}) {
+// stopperByErrorsQuote is ther stopper by errors quota
+func stopperByErrorsQuota(ctx context.Context, errorsCh chan error, errorsQuota uint) (errorsLimit chan struct{}) {
 	errorsLimit = make(chan struct{}, 1)
 
-	go func(){
+	go func() {
 		var errorsCount uint
 	L1:
 		for {
 			select {
 			case <-ctx.Done():
 				break L1
-			case <- errorsCh:
+			case <-errorsCh:
 				errorsCount++
 
 				if errorsCount == errorsQuota {
@@ -41,7 +34,7 @@ func stoperByErrorsQuote(ctx context.Context, errorsCh chan error, errorsQuota u
 }
 
 // Run function starts proceed of tasks in N gorutines with M maximum possible errors
-func Run(tasks []func()error, N int, M int) (err error) {
+func Run(tasks []func() error, N int, M int) (err error) {
 
 	if N < 0 || M < 0 {
 		return errors.New("N and M params mast be more then 0")
@@ -58,12 +51,12 @@ func Run(tasks []func()error, N int, M int) (err error) {
 	ctx, finish := context.WithCancel(context.Background())
 	tasksCh, wg, errorsCh := goroutinesStarter(ctx, uint(N), uint(M), len(tasks))
 	defer close(errorsCh)
-	errorsLimit := stoperByErrorsQuote(ctx, errorsCh, uint(M))
+	errorsLimit := stopperByErrorsQuota(ctx, errorsCh, uint(M))
 
 L1:
 	for _, task := range tasks {
 		select {
-		case <- errorsLimit:
+		case <-errorsLimit:
 			err = errors.New("error limit exceeded")
 			break L1
 		case tasksCh <- task:
@@ -86,70 +79,50 @@ L1:
 
 // GorutinesStarter starts proceed of tasks in N gorutines with M maximum possible errors
 func goroutinesStarter(ctx context.Context, goroutinesQuota uint, errorsQuota uint, tasksNum int) (tasksCh chan func() error, wg *sync.WaitGroup, errorsCh chan error) {
-	dataSlice	:= getGoroutineDataSlice(goroutinesQuota, tasksNum)
-	tasksCh     = make(chan func() error)
-	errorsCh	= make(chan error, errorsQuota)
-	wg 			= &sync.WaitGroup{}
+	tasksCh = make(chan func() error)
+	errorsCh = make(chan error, goroutinesQuota)
+	wg = &sync.WaitGroup{}
 	wg.Add(1)
 
 	go func() {
 		defer close(tasksCh)
 		log.Print("funcs start: ")
-L1:
-		for i := uint(0); ; {
-			select {
-			case <-ctx.Done():
-				break L1
-			case <- (*dataSlice)[i].IfNeed2StartChannel:
-				wg.Add(1)
-				(*dataSlice)[i].TasksChannel = tasksCh
-				(*dataSlice)[i].ErrorsChannel = errorsCh
-				(*dataSlice)[i].WaitGroup = wg
-				go funcProceed(&(*dataSlice)[i])
-			default:
-			}
 
-			i++
-			if i == goroutinesQuota {
-				i = 0
-			}
+		for i := 0; i < int(goroutinesQuota); i++ {
+			wg.Add(1)
+			go taskPropceed(wg, tasksCh, errorsCh)
 		}
+		log.Print("all goroutines has start")
+		<-ctx.Done()
 		log.Print("goroutinesStarter has stop")
 		wg.Done()
 	}()
 	return tasksCh, wg, errorsCh
 }
 
-// getGoroutineDataSlice is get slice of GoroutineData
-func getGoroutineDataSlice(N uint, tasksNum int) *[]GoroutineData {
-	dataSlice := make([]GoroutineData, 0, N)
+// taskPropceed proceeds a given task
+func taskPropceed(wg *sync.WaitGroup, tasksCh chan func() error, errorsCh chan error) {
+	defer func() {
+		wg.Done()
+	}()
 
-	for i := uint(0); i < N; i++ {
-		data := GoroutineData{
-			IfNeed2StartChannel: make(chan struct{}, 1),
-		}
-		data.IfNeed2StartChannel <- struct{}{}
-		dataSlice = append(dataSlice, data)
+	for task := range tasksCh {
+		funcProceed(task, errorsCh)
 	}
-	return &dataSlice
 }
 
 // funcProceed proceeds a given func
-func funcProceed(data *GoroutineData) {
-	defer func(){
+func funcProceed(f func() error, ErrorsChannel chan error) {
+	defer func() {
 		if err := recover(); err != nil {
-			data.ErrorsChannel <- errors.Wrap(err.(error), "panic happened in given func")
-			data.IfNeed2StartChannel <- struct{}{}
+			ErrorsChannel <- errors.New("panic happened in given func: " + err.(string))
 		}
-		data.WaitGroup.Done()
 	}()
 
-	for task := range data.TasksChannel {
-		err := task()
-		log.Print(".")
+	err := f()
+	log.Print(".")
 
-		if err != nil {
-			data.ErrorsChannel <- err
-		}
+	if err != nil {
+		ErrorsChannel <- err
 	}
 }
