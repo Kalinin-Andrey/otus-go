@@ -55,11 +55,19 @@ func Run(tasks []func() error, N int, M int) (err error) {
 
 L1:
 	for _, task := range tasks {
+
 		select {
 		case <-errorsLimit:
 			err = errors.New("error limit exceeded")
 			break L1
-		case tasksCh <- task:
+		default:
+
+			select {
+			case <-errorsLimit:
+				err = errors.New("error limit exceeded")
+				break L1
+			case tasksCh <- task:
+			}
 		}
 	}
 
