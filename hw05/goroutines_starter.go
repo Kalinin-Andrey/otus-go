@@ -16,7 +16,7 @@ func stopperByErrorsQuota(errorsCh chan error, errorsQuota uint) (errorsLimit ch
 		defer close(errorsLimit)
 		var errorsCount uint
 
-		for _ = range errorsCh {
+		for range errorsCh {
 			errorsCount++
 
 			if errorsCount == errorsQuota {
