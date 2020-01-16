@@ -9,24 +9,19 @@ import (
 )
 
 // stopperByErrorsQuote is ther stopper by errors quota
-func stopperByErrorsQuota(ctx context.Context, errorsCh chan error, errorsQuota uint) (errorsLimit chan struct{}) {
+func stopperByErrorsQuota(errorsCh chan error, errorsQuota uint) (errorsLimit chan struct{}) {
 	errorsLimit = make(chan struct{}, 1)
 
 	go func() {
+		defer close(errorsLimit)
 		var errorsCount uint
-	L1:
-		for {
-			select {
-			case <-ctx.Done():
-				break L1
-			case <-errorsCh:
-				errorsCount++
 
-				if errorsCount == errorsQuota {
-					errorsLimit <- struct{}{}
-					log.Printf("error limit %v has exceed", errorsCount)
-					break L1
-				}
+		for _ = range errorsCh {
+			errorsCount++
+
+			if errorsCount == errorsQuota {
+				errorsLimit <- struct{}{}
+				log.Printf("error limit %v has exceed", errorsCount)
 			}
 		}
 	}()
@@ -51,7 +46,7 @@ func Run(tasks []func() error, N int, M int) (err error) {
 	ctx, finish := context.WithCancel(context.Background())
 	tasksCh, wg, errorsCh := goroutinesStarter(ctx, uint(N), uint(M), len(tasks))
 	defer close(errorsCh)
-	errorsLimit := stopperByErrorsQuota(ctx, errorsCh, uint(M))
+	errorsLimit := stopperByErrorsQuota(errorsCh, uint(M))
 
 L1:
 	for _, task := range tasks {
