@@ -56,13 +56,13 @@ L1:
 			err = errors.New("error limit exceeded")
 			break L1
 		default:
+		}
 
-			select {
-			case <-errorsLimit:
-				err = errors.New("error limit exceeded")
-				break L1
-			case tasksCh <- task:
-			}
+		select {
+		case <-errorsLimit:
+			err = errors.New("error limit exceeded")
+			break L1
+		case tasksCh <- task:
 		}
 	}
 
