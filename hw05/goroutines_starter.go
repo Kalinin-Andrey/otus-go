@@ -1,7 +1,6 @@
 package hw05
 
 import (
-	"context"
 	"github.com/pkg/errors"
 	"log"
 	"strconv"
@@ -43,8 +42,7 @@ func Run(tasks []func() error, N int, M int) (err error) {
 		return nil
 	}
 
-	ctx, finish := context.WithCancel(context.Background())
-	tasksCh, wg, errorsCh := goroutinesStarter(ctx, uint(N), uint(M), len(tasks))
+	tasksCh, wg, errorsCh := goroutinesStarter(uint(N), uint(M), len(tasks))
 	defer close(errorsCh)
 	errorsLimit := stopperByErrorsQuota(errorsCh, uint(M))
 
@@ -69,39 +67,38 @@ L1:
 	if err == nil {
 		log.Print("tasks are over")
 	}
-	finish()
-	log.Print("send finish signal")
+	close(tasksCh)
+	log.Print("close task channel")
 	wg.Wait()
-	//	check for error limit exceeded after finish
-	select {
-	case <-errorsLimit:
-		err = errors.New("error limit exceeded")
-		log.Print("error limit exceeded in the end")
-	default:
+
+	if err == nil {
+		//	check for error limit exceeded after finish
+		select {
+		case <-errorsLimit:
+			err = errors.New("error limit exceeded")
+			log.Print("error limit exceeded in the end")
+		default:
+		}
 	}
 	log.Print("Done!")
 	return err
 }
 
 // GorutinesStarter starts proceed of tasks in N gorutines with M maximum possible errors
-func goroutinesStarter(ctx context.Context, goroutinesQuota uint, errorsQuota uint, tasksNum int) (tasksCh chan func() error, wg *sync.WaitGroup, errorsCh chan error) {
+func goroutinesStarter(goroutinesQuota uint, errorsQuota uint, tasksNum int) (tasksCh chan func() error, wg *sync.WaitGroup, errorsCh chan error) {
 	tasksCh = make(chan func() error)
 	errorsCh = make(chan error, goroutinesQuota)
 	wg = &sync.WaitGroup{}
+	log.Print("goroutines are starting:")
 	wg.Add(1)
 
 	go func() {
-		defer close(tasksCh)
-		log.Print("funcs start: ")
-
 		for i := 0; i < int(goroutinesQuota); i++ {
 			wg.Add(1)
 			go taskPropceed(wg, tasksCh, errorsCh)
 		}
-		log.Print("all goroutines has start")
-		<-ctx.Done()
-		log.Print("goroutinesStarter has stop")
 		wg.Done()
+		log.Print("all goroutines has start")
 	}()
 	return tasksCh, wg, errorsCh
 }
