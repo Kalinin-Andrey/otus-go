@@ -28,6 +28,7 @@ func funcWithPanic() error {
 	//panic(errors.New("A am panic!"))
 }
 
+
 func TestRunPositive(t *testing.T) {
 	funcsSlice := make([]func() error, 0, NumberOfFuncs)
 	countOfFuncsChannel := make(chan struct{}, NumberOfFuncs)
@@ -50,6 +51,7 @@ func TestRunPositive(t *testing.T) {
 		t.Errorf("Count of executed funcs is %v, expected %v", len(countOfFuncsChannel), NumberOfFuncs)
 	}
 }
+
 
 func TestRunNegative(t *testing.T) {
 	funcsSlice := make([]func() error, 0, NumberOfFuncs)
@@ -115,3 +117,39 @@ func TestRunWithPanics(t *testing.T) {
 		t.Errorf("Count of executed funcs is %v, expected <= %v", len(countOfFuncsChannel), QuoteOfErrors+NumberOfGoroutines)
 	}
 }
+
+
+
+func TestRunNegativeAfterFinish(t *testing.T) {
+	funcsSlice := make([]func() error, 0, NumberOfFuncs)
+	countOfFuncsChannel := make(chan struct{}, NumberOfFuncs)
+
+	function := func() error {
+		countOfFuncsChannel <- struct{}{}
+		return funcWithoutError()
+	}
+
+	functionFail := func() error {
+		countOfFuncsChannel <- struct{}{}
+		return funcWithError()
+	}
+
+	for i := 0; i < NumberOfFuncs-QuoteOfErrors; i++ {
+		funcsSlice = append(funcsSlice, function)
+	}
+
+	for i := 0; i < QuoteOfErrors; i++ {
+		funcsSlice = append(funcsSlice, functionFail)
+	}
+	err := Run(funcsSlice, NumberOfGoroutines, QuoteOfErrors)
+
+	if err == nil {
+		t.Error("Result must be negative")
+	}
+
+	if len(countOfFuncsChannel) != NumberOfFuncs {
+		t.Errorf("Count of executed funcs is %v, expected %v", len(countOfFuncsChannel), NumberOfFuncs)
+	}
+}
+
+

@@ -72,9 +72,12 @@ L1:
 	finish()
 	log.Print("send finish signal")
 	wg.Wait()
-	//	check again
-	if err == nil && len(errorsCh) == M {
+	//	check for error limit exceeded after finish
+	select {
+	case <-errorsLimit:
+		err = errors.New("error limit exceeded")
 		log.Print("error limit exceeded in the end")
+	default:
 	}
 	log.Print("Done!")
 	return err
