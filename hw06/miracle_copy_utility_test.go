@@ -44,6 +44,11 @@ func TestCopy(t *testing.T) {
 		if fileInfoFrom.Size() != fileInfoTo.Size() {
 			t.Errorf("Size of the resulting file is %v, expected %v", fileInfoTo.Size(), fileInfoFrom.Size())
 		}
+
+		err = os.Remove(testCase.to)
+		if err != nil {
+			t.Errorf("os.Remove error: %s", err)
+		}
 	}
 }
 

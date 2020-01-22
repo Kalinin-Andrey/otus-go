@@ -39,10 +39,12 @@ func Copy(from string, to string, limit int, offset int) error{
 		return errors.Wrapf(err, "Error get stat of file %v", from)
 	}
 	fileFrom, err := os.OpenFile(from, os.O_RDONLY, 0644)
+	defer fileFrom.Close()
 	if err != nil {
 		return errors.Wrapf(err, "Can't open file %v", from)
 	}
 	fileTo, err := os.OpenFile(to, os.O_WRONLY|os.O_CREATE, 0644)
+	defer fileTo.Close()
 	if err != nil {
 		return errors.Wrapf(err, "Can't open file %v", from)
 	}
