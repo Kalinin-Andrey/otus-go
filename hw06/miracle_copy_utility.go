@@ -1,4 +1,3 @@
-//package hw06
 package main
 
 import (
@@ -27,29 +26,25 @@ func main() {
 
 	flag.Parse()
 
-	from    := "go.mod"
-	to      := "go.mod.copy"
-	limit   := -1
-	offset  := 0
-
 	err := Copy(from, to, limit, offset)
 	if err != nil {
 		log.Fatalln("Copy error: " + err.Error())
 	}
 }
 
+// Copy is the miracle function for copying one file to another
 func Copy(from string, to string, limit int, offset int) error{
 	fileInfo, err := os.Stat(from)
 	if err != nil {
-		errors.Wrapf(err, "Error get stat of file %v", from)
+		return errors.Wrapf(err, "Error get stat of file %v", from)
 	}
 	fileFrom, err := os.OpenFile(from, os.O_RDONLY, 0644)
 	if err != nil {
-		errors.Wrapf(err, "Can't open file %v", from)
+		return errors.Wrapf(err, "Can't open file %v", from)
 	}
 	fileTo, err := os.OpenFile(to, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		errors.Wrapf(err, "Can't open file %v", from)
+		return errors.Wrapf(err, "Can't open file %v", from)
 	}
 
 	count := 100
@@ -65,6 +60,7 @@ func Copy(from string, to string, limit int, offset int) error{
 			errors.Wrapf(err, "Error io.CopyN from=%v; to=%v", from, to)
 		}
 		bar.Increment()
+		//time.Sleep(0.5 * time.Second)
 	}
 	bar.Finish()
 
