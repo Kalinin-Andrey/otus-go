@@ -8,16 +8,34 @@ import (
 type TestCase struct {
 	from string
 	to string
-	limit int
-	offset int
+	limit uint
+	offset uint
 }
 
 var testCases []TestCase = []TestCase{
 	TestCase{
 		from    : "go.mod",
 		to      : "go.mod.copy",
-		limit   : -1,
+		limit   : 0,
 		offset  : 0,
+	},
+	TestCase{
+		from    : "go.mod",
+		to      : "go.mod.copy",
+		limit   : 0,
+		offset  : 47,
+	},
+	TestCase{
+		from    : "go.mod",
+		to      : "go.mod.copy",
+		limit   : 207,
+		offset  : 47,
+	},
+	TestCase{
+		from    : "go.mod",
+		to      : "go.mod.copy",
+		limit   : 18,
+		offset  : 47,
 	},
 }
 
@@ -41,8 +59,16 @@ func TestCopy(t *testing.T) {
 			t.Errorf("os.Stat error: %s", err)
 		}
 
-		if fileInfoFrom.Size() != fileInfoTo.Size() {
-			t.Errorf("Size of the resulting file is %v, expected %v", fileInfoTo.Size(), fileInfoFrom.Size())
+		var sizeToCopy uint = uint(fileInfoFrom.Size()) - testCase.offset
+
+		if testCase.limit > 0 {
+			if sizeToCopy > testCase.limit {
+				sizeToCopy = testCase.limit
+			}
+		}
+
+		if int64(sizeToCopy) != fileInfoTo.Size() {
+			t.Errorf("Size of the resulting file is %v, expected %v", fileInfoTo.Size(), sizeToCopy)
 		}
 
 		err = os.Remove(testCase.to)
