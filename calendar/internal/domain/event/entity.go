@@ -2,26 +2,20 @@ package event
 
 import(
 	"strconv"
+	"time"
 )
 
-type IEvent interface {
-
-}
-
-type Date struct {
-	Year  uint8
-	Month uint8
-	Day   uint8
-}
-
-func (d Date) String() string {
-	return strconv.FormatUint(uint64(d.Day), 10) + "." + strconv.FormatUint(uint64(d.Month), 10) + "." + strconv.FormatUint(uint64(d.Year), 10)
-}
+//type IEvent interface {}
 
 type Event struct {
-	Id		uint
-	Name	string
-	Date	Date
+	Id			uint
+	Name		string
+	Date		time.Time
+	Duration	time.Duration
+}
+
+func New() *Event{
+	return &Event{}
 }
 
 func (e Event) String() string {
