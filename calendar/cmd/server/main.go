@@ -8,7 +8,7 @@ import (
 
 
 func main() {
-	err, cfg := config.Get()
+	cfg, err := config.Get()
 	if err != nil {
 		log.Fatalln("Can not load the config")
 	}

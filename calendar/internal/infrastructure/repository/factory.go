@@ -4,9 +4,10 @@ import(
 	"github.com/pkg/errors"
 
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/domain/event"
-	"github.com/Kalinin-Andrey/otus-go/calendar/internal/infrastructure/repository/in_memory"
+	"github.com/Kalinin-Andrey/otus-go/calendar/internal/infrastructure/repository/inmemory"
 )
 
+// Get the repository
 func Get(entity string, repoType string) (repo event.IEventRepository, err error) {
 
 	switch entity {
@@ -22,7 +23,7 @@ func eventRepo(repoType string) (repo event.IEventRepository, err error){
 
 	switch repoType {
 	case "in_memory":
-		repo = in_memory.New()
+		repo = inmemory.New()
 	default:
 		err = errors.Errorf("RepoType %q not found", repoType)
 	}

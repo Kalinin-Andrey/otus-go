@@ -6,19 +6,21 @@ import (
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/config"
 )
 
-type ApiApp struct {
+// App is the application for API
+type App struct {
 	*commonApp.App
 }
 
-func New(cfg config.Configuration) *ApiApp {
-	app := &ApiApp{
+// New func is a constructor for the ApiApp
+func New(cfg config.Configuration) *App {
+	app := &App{
 		commonApp.New(cfg),
 	}
 
 	return app
 }
 
-
-func (app *ApiApp) Run() error {
+// Run is func to run the ApiApp
+func (app *App) Run() error {
 	return nil
 }
