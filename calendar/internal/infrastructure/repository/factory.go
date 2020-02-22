@@ -22,7 +22,7 @@ func Get(entity string, repoType string) (repo event.IEventRepository, err error
 func eventRepo(repoType string) (repo event.IEventRepository, err error){
 
 	switch repoType {
-	case "in_memory":
+	case "inmemory":
 		repo = inmemory.New()
 	default:
 		err = errors.Errorf("RepoType %q not found", repoType)
