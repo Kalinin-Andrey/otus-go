@@ -2,9 +2,12 @@ server:
   http_listen:  "localhost:8080"
 
 log:
-  OutputPaths:
+  output_paths:
     - "log"
   level:        "debug"
+
+db:
+  dsn:          ""
 
 repository:
   type:       "inmemory"

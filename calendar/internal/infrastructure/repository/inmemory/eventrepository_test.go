@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Kalinin-Andrey/otus-go/calendar/internal/calendarerror"
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/domain/event"
+	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/calendarerror"
 )
 
 var repo event.IEventRepository

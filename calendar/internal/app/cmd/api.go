@@ -3,7 +3,7 @@ package cmd
 import (
 
 	commonApp "github.com/Kalinin-Andrey/otus-go/calendar/internal/app"
-	"github.com/Kalinin-Andrey/otus-go/calendar/internal/config"
+	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/config"
 )
 
 // App is the application for CLI app

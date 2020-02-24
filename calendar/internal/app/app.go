@@ -1,19 +1,22 @@
 package api
 
 import (
-	golog	"log"
+	golog "log"
 
-	"github.com/Kalinin-Andrey/otus-go/calendar/internal/config"
-	"github.com/Kalinin-Andrey/otus-go/calendar/internal/log"
+	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/config"
+	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/db"
+	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/log"
+
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/domain/event"
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/infrastructure/repository"
 )
 
 // App struct is the common part of all applications
 type App struct {
-	Cfg	config.Configuration
-	Logger	log.Logger
-	Event	struct{
+	Cfg    config.Configuration
+	Logger log.ILogger
+	DB     db.IDB
+	Event  struct{
 		//entity		event.IEvent
 		Repository	event.IEventRepository
 	}
@@ -26,9 +29,15 @@ func New(cfg config.Configuration) *App {
 		panic(err)
 	}
 
+	/*db, err := db.New(cfg.DB, logger)
+	if err != nil {
+		panic(err)
+	}*/
+
 	app := &App{
 		Cfg: cfg,
 		Logger:	logger,
+		//DB:		db,
 	}
 
 	repository, err := repository.Get("event", app.Cfg.Repository.Type)

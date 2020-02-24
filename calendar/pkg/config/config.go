@@ -3,9 +3,9 @@ package config
 import (
 	"context"
 	"flag"
-	"github.com/heetch/confita/backend/env"
 
 	"github.com/heetch/confita"
+	"github.com/heetch/confita/backend/env"
 	"github.com/heetch/confita/backend/file"
 	"github.com/heetch/confita/backend/flags"
 )
@@ -16,6 +16,7 @@ type Configuration struct {
 		HTTPListen						string `config:"http_listen"`
 	}									`config:"server"`
 	Log			Log					`config:"log"`
+	DB			DB					`config:"db"`
 	Repository	struct {
 		Type		string				`config:"type"`
 	}									`config:"repository"`
@@ -23,8 +24,13 @@ type Configuration struct {
 
 // Log is config for a logger
 type Log struct {
-	OutputPaths	[]string			`config:"outputPaths"`
+	OutputPaths	[]string			`config:"output_paths"`
 	Level		string				`config:"level"`
+}
+
+// DB is config for a DB connection
+type DB struct {
+	DSN			string				`config:"dsn"`
 }
 
 // defaultPathToConfig is the default path to the app config
