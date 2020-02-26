@@ -13,7 +13,7 @@ import (
 // Configuration is the struct for app configuration
 type Configuration struct {
 	Server		struct {
-		HTTPListen						string `config:"http_listen"`
+		HTTPListen	string			`config:"httplisten"`
 	}									`config:"server"`
 	Log			Log					`config:"log"`
 	DB			DB					`config:"db"`
@@ -24,7 +24,8 @@ type Configuration struct {
 
 // Log is config for a logger
 type Log struct {
-	OutputPaths	[]string			`config:"output_paths"`
+	Encoding	string
+	OutputPaths	[]string			`config:"outputpaths"`
 	Level		string				`config:"level"`
 }
 

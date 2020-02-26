@@ -1,6 +1,8 @@
 package log
 
 import (
+	"context"
+	"github.com/golang/gddo/log"
 	//"context"
 	"github.com/pkg/errors"
 
@@ -49,7 +51,12 @@ func New(conf config.Log) (*Logger, error) {
 
 	logger := NewWithZap(zapLogger)
 
-	defer logger.Sync()
+	defer func() {
+		err := logger.Sync()
+		if err != nil {
+			log.Error(context.Background(), err.Error())
+		}
+	}()
 
 	logger.Info("Logger construction succeeded")
 	return logger, nil
@@ -57,6 +64,7 @@ func New(conf config.Log) (*Logger, error) {
 
 func configToZapConfig(conf config.Log) (cfg zap.Config, err error) {
 	cfg.OutputPaths = conf.OutputPaths
+	cfg.Encoding	= conf.Encoding
 
 	level := zap.NewAtomicLevel()
 	err = level.UnmarshalText([]byte(conf.Level))
