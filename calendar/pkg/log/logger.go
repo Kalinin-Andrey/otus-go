@@ -1,8 +1,8 @@
 package log
 
 import (
-	"context"
-	"github.com/golang/gddo/log"
+	"go.uber.org/zap/zapcore"
+	"log"
 	//"context"
 	"github.com/pkg/errors"
 
@@ -54,7 +54,7 @@ func New(conf config.Log) (*Logger, error) {
 	defer func() {
 		err := logger.Sync()
 		if err != nil {
-			log.Error(context.Background(), err.Error())
+			log.Println(err.Error())
 		}
 	}()
 
@@ -62,16 +62,38 @@ func New(conf config.Log) (*Logger, error) {
 	return logger, nil
 }
 
-func configToZapConfig(conf config.Log) (cfg zap.Config, err error) {
-	cfg.OutputPaths = conf.OutputPaths
-	cfg.Encoding	= conf.Encoding
+var defaultZapConfig	= zap.Config {
+	Encoding:		"json",
+	EncoderConfig:	zapcore.EncoderConfig{
+		MessageKey:     "message",
+		LevelKey:       "level",
+		TimeKey:        "",
+		NameKey:        "",
+		CallerKey:      "",
+		StacktraceKey:  "",
+		LineEnding:     "",
+		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		EncodeTime:     nil,
+		EncodeDuration: nil,
+		EncodeCaller:   nil,
+		EncodeName:     nil,
+	},
+}
 
-	level := zap.NewAtomicLevel()
-	err = level.UnmarshalText([]byte(conf.Level))
+func configToZapConfig(conf config.Log) (cfg zap.Config, err error) {
+	cfg.OutputPaths 	= conf.OutputPaths
+	cfg.Encoding		= conf.Encoding
+	cfg.InitialFields	= make(map[string]interface{}, len(conf.InitialFields))
+
+	for key, val := range conf.InitialFields {
+		cfg.InitialFields[key] = val
+	}
+
+	err = cfg.Level.UnmarshalText([]byte(conf.Level))
 	if err != nil {
 		return cfg, errors.Wrapf(err, "Can not unmarshal text %q, expected one of zapcore.Levels", conf.Level)
 	}
-	cfg.Level = level
+
 	return cfg,nil
 }
 

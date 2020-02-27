@@ -9,5 +9,6 @@ require (
 	github.com/heetch/confita v0.9.0
 	github.com/inconshreveable/log15 v0.0.0-20200109203555-b30bc20e4fd1 // indirect
 	github.com/pkg/errors v0.9.1
+	github.com/ulule/deepcopier v0.0.0-20200117111125-792cfb847af8
 	go.uber.org/zap v1.14.0
 )

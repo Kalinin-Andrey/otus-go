@@ -24,9 +24,10 @@ type Configuration struct {
 
 // Log is config for a logger
 type Log struct {
-	Encoding	string
-	OutputPaths	[]string			`config:"outputpaths"`
-	Level		string				`config:"level"`
+	Encoding		string
+	OutputPaths		[]string		`config:"outputPaths"`
+	Level			string
+	InitialFields	map[string]interface{}	`config:"initialFields"`
 }
 
 // DB is config for a DB connection

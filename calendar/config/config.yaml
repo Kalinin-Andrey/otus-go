@@ -6,6 +6,8 @@ log:
   outputpaths:
     - "log/app.log"
   level:        "debug"
+  initialfields:
+    app:        "api"
 
 db:
   dsn:          ""
