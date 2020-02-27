@@ -1,13 +1,11 @@
 package log
 
 import (
-	"go.uber.org/zap/zapcore"
-	"log"
-	//"context"
 	"github.com/pkg/errors"
+	"log"
 
-	//"go.uber.org/zap/zapcore"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/config"
 )
@@ -37,6 +35,24 @@ type Logger struct {
 	*zap.SugaredLogger
 }
 
+var defaultZapConfig	= zap.Config {
+	Encoding:		"json",
+	EncoderConfig:	zapcore.EncoderConfig{
+		MessageKey:     "message",
+		LevelKey:       "level",
+		TimeKey:        "time",
+		NameKey:        "logger",
+		CallerKey:      "caller",
+		StacktraceKey:  "",
+		LineEnding:     "",
+		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		EncodeTime:     zapcore.ISO8601TimeEncoder,
+		EncodeDuration: nil,
+		EncodeCaller:   zapcore.FullCallerEncoder,
+		EncodeName:     nil,
+	},
+}
+
 // New creates a new logger
 func New(conf config.Log) (*Logger, error) {
 	cfg, err := configToZapConfig(conf)
@@ -62,25 +78,8 @@ func New(conf config.Log) (*Logger, error) {
 	return logger, nil
 }
 
-var defaultZapConfig	= zap.Config {
-	Encoding:		"json",
-	EncoderConfig:	zapcore.EncoderConfig{
-		MessageKey:     "message",
-		LevelKey:       "level",
-		TimeKey:        "",
-		NameKey:        "",
-		CallerKey:      "",
-		StacktraceKey:  "",
-		LineEnding:     "",
-		EncodeLevel:    zapcore.LowercaseLevelEncoder,
-		EncodeTime:     nil,
-		EncodeDuration: nil,
-		EncodeCaller:   nil,
-		EncodeName:     nil,
-	},
-}
-
-func configToZapConfig(conf config.Log) (cfg zap.Config, err error) {
+func configToZapConfig(conf config.Log) (zap.Config, error) {
+	cfg := defaultZapConfig
 	cfg.OutputPaths 	= conf.OutputPaths
 	cfg.Encoding		= conf.Encoding
 	cfg.InitialFields	= make(map[string]interface{}, len(conf.InitialFields))
@@ -89,8 +88,7 @@ func configToZapConfig(conf config.Log) (cfg zap.Config, err error) {
 		cfg.InitialFields[key] = val
 	}
 
-	err = cfg.Level.UnmarshalText([]byte(conf.Level))
-	if err != nil {
+	if err := cfg.Level.UnmarshalText([]byte(conf.Level)); err != nil {
 		return cfg, errors.Wrapf(err, "Can not unmarshal text %q, expected one of zapcore.Levels", conf.Level)
 	}
 
