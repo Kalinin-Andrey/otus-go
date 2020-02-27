@@ -1,8 +1,8 @@
 package inmemory
 
-import(
+import (
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/domain/event"
-	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/calendarerror"
+	calendarerror2 "github.com/Kalinin-Andrey/otus-go/calendar/internal/pkg/calendarerror"
 )
 
 // startCapacity of the repository
@@ -30,22 +30,22 @@ func New() *EventRepository{
 }
 
 // Create an entity
-func (r *EventRepository) Create(event *event.Event) error {
+func (r *EventRepository) Create(event *event.Event) (uint, error) {
 
 	if !r.IsTimeNotBusy(event) {
-		return calendarerror.ErrTimeIsBusy
+		return 0, calendarerror2.ErrTimeIsBusy
 	}
 
 	event.ID = nextID()
 	r.eventsList[event.ID] = event
-	return nil
+	return event.ID, nil
 }
 
 // Read an entity
 func (r *EventRepository) Read(eventID uint) (event *event.Event, err error) {
 	event, ok := r.eventsList[eventID]
 	if !ok {
-		err = calendarerror.ErrNotFound
+		err = calendarerror2.ErrNotFound
 	}
 	return event, err
 }
@@ -61,12 +61,12 @@ func (r *EventRepository) Update(event *event.Event) (err error) {
 	if _, ok := r.eventsList[(*event).ID]; ok {
 
 		if !r.IsTimeNotBusy(event) {
-			return calendarerror.ErrTimeIsBusy
+			return calendarerror2.ErrTimeIsBusy
 		}
 
 		r.eventsList[(*event).ID] = event
 	} else {
-		err = calendarerror.ErrNotFound
+		err = calendarerror2.ErrNotFound
 	}
 	return err
 }
@@ -75,7 +75,7 @@ func (r *EventRepository) Update(event *event.Event) (err error) {
 func (r *EventRepository) Delete(eventID uint) (err error) {
 	_, ok := r.eventsList[eventID]
 	if !ok {
-		err = calendarerror.ErrNotFound
+		err = calendarerror2.ErrNotFound
 	} else {
 		delete(r.eventsList, eventID)
 	}

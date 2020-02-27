@@ -1,4 +1,4 @@
-package calendarerror
+package errorshandler
 
 import (
 	"database/sql"

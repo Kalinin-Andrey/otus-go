@@ -1,12 +1,12 @@
 package inmemory
 
 import (
+	calendarerror2 "github.com/Kalinin-Andrey/otus-go/calendar/internal/pkg/calendarerror"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/domain/event"
-	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/calendarerror"
 )
 
 var repo event.IEventRepository
@@ -87,7 +87,7 @@ func init() {
 func TestEventRepository_Create(t *testing.T) {
 
 	for _, eventID := range eventsIDs {
-		err := repo.Create(events[eventID])
+		_, err := repo.Create(events[eventID])
 		if err != nil {
 			t.Fatalf("func Create has an error: %s", err)
 		}
@@ -141,8 +141,8 @@ func TestEventRepository_Delete(t *testing.T) {
 		t.Fatalf("func Delete has an error: %s", err)
 	}
 	_, err = repo.Read(eventID)
-	if err != calendarerror.ErrNotFound {
-		t.Errorf("Read deleted event has return unexpected error, expected error %v, has given %v", calendarerror.ErrNotFound, err)
+	if err != calendarerror2.ErrNotFound {
+		t.Errorf("Read deleted event has return unexpected error, expected error %v, has given %v", calendarerror2.ErrNotFound, err)
 	}
 }
 
@@ -152,34 +152,34 @@ func TestEventRepository_TimeIsBusy(t *testing.T) {
 
 	updatedEvent.Time = event.Time
 	err := repo.Update(updatedEvent)
-	if err != calendarerror.ErrTimeIsBusy {
-		t.Errorf("Update event has return unexpected error, expected error %v, has given %v", calendarerror.ErrTimeIsBusy, err)
+	if err != calendarerror2.ErrTimeIsBusy {
+		t.Errorf("Update event has return unexpected error, expected error %v, has given %v", calendarerror2.ErrTimeIsBusy, err)
 	}
 
 	updatedEvent.Time = event.Time.Add(halfHour)
 	err = repo.Update(updatedEvent)
-	if err != calendarerror.ErrTimeIsBusy {
-		t.Errorf("Update event has return unexpected error, expected error %v, has given %v", calendarerror.ErrTimeIsBusy, err)
+	if err != calendarerror2.ErrTimeIsBusy {
+		t.Errorf("Update event has return unexpected error, expected error %v, has given %v", calendarerror2.ErrTimeIsBusy, err)
 	}
 
 	updatedEvent.Time = time.Date(2020, 01, 01, 0, 30, 0, 0, locationMoscow)
 	err = repo.Update(updatedEvent)
-	if err != calendarerror.ErrTimeIsBusy {
-		t.Errorf("Update event has return unexpected error, expected error %v, has given %v", calendarerror.ErrTimeIsBusy, err)
+	if err != calendarerror2.ErrTimeIsBusy {
+		t.Errorf("Update event has return unexpected error, expected error %v, has given %v", calendarerror2.ErrTimeIsBusy, err)
 	}
 
 	updatedEvent.Time = time.Date(2020, 01, 01, 00, 0, 0, 0, locationMoscow)
 	updatedEvent.Duration = twoHour
 	err = repo.Update(updatedEvent)
-	if err != calendarerror.ErrTimeIsBusy {
-		t.Errorf("Update event has return unexpected error, expected error %v, has given %v", calendarerror.ErrTimeIsBusy, err)
+	if err != calendarerror2.ErrTimeIsBusy {
+		t.Errorf("Update event has return unexpected error, expected error %v, has given %v", calendarerror2.ErrTimeIsBusy, err)
 	}
 
 	updatedEvent.Time = time.Date(2020, 01, 01, 00, 0, 0, 0, locationMoscow)
 	updatedEvent.Duration = threeHour
 	err = repo.Update(updatedEvent)
-	if err != calendarerror.ErrTimeIsBusy {
-		t.Errorf("Update event has return unexpected error, expected error %v, has given %v", calendarerror.ErrTimeIsBusy, err)
+	if err != calendarerror2.ErrTimeIsBusy {
+		t.Errorf("Update event has return unexpected error, expected error %v, has given %v", calendarerror2.ErrTimeIsBusy, err)
 	}
 
 	updatedEvent.Time = time.Date(2020, 01, 01, 00, 0, 0, 0, locationMoscow)
