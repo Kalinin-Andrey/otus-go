@@ -6,6 +6,8 @@ import (
 
 	"github.com/go-ozzo/ozzo-routing/v2"
 
+	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/accesslog"
+	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/calendarerror"
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/config"
 
 	commonApp "github.com/Kalinin-Andrey/otus-go/calendar/internal/app"
@@ -39,6 +41,12 @@ func New(cfg config.Configuration) *App {
 
 func (app *App) buildHandler() *routing.Router {
 	router := routing.New()
+
+	router.Use(
+		accesslog.Handler(app.Logger),
+		calendarerror.Handler(app.Logger),
+	)
+
 
 	router.Get("/hello", func(c *routing.Context) error {
 		return c.Write("Hello word!")
