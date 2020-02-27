@@ -10,6 +10,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/heetch/confita v0.9.0
 	github.com/inconshreveable/log15 v0.0.0-20200109203555-b30bc20e4fd1 // indirect
+	github.com/lib/pq v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/qiangxue/go-rest-api v1.0.1
 	github.com/ulule/deepcopier v0.0.0-20200117111125-792cfb847af8

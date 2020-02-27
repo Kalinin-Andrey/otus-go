@@ -4,6 +4,8 @@ import (
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/config"
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/log"
 	"github.com/go-ozzo/ozzo-dbx"
+	//"database/sql"
+	_ "github.com/lib/pq"
 )
 
 // IDB is the interface for a DB connection

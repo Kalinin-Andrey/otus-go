@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+
+  postgres:
+    container_name: postgres
+    #db with dev data
+    #image: moesk-postgres12:0.0.4
+    # for pure postgres
+    image: postgres:12.2
+    #volumes:
+    #    - ./data/postgres:/docker-entrypoint-initdb.d
+    restart: always
+    environment:
+        PGDATA: /var/lib/postgresql-static/data
+        POSTGRES_DB:        postgres
+        POSTGRES_USER:      postgres
+        POSTGRES_PASSWORD:  postgres
+    ports:
+        - "5401:5432"
+    networks:
+        - backend
+    tty: true
+networks:
+  backend:

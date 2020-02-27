@@ -29,15 +29,15 @@ func New(cfg config.Configuration) *App {
 		panic(err)
 	}
 
-	/*db, err := db.New(cfg.DB, logger)
+	db, err := db.New(cfg.DB, logger)
 	if err != nil {
 		panic(err)
-	}*/
+	}
 
 	app := &App{
 		Cfg: cfg,
 		Logger:	logger,
-		//DB:		db,
+		DB:		db,
 	}
 
 	repository, err := repository.Get("event", app.Cfg.Repository.Type)
