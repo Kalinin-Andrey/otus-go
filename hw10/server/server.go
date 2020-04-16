@@ -14,11 +14,18 @@ func handleConnection(conn net.Conn) {
 	defer conn.Close()
 	conn.Write([]byte(fmt.Sprintf("Welcome to %s, friend from %s\n", conn.LocalAddr(), conn.RemoteAddr())))
 
-	ctx := rw.ContextWithCancelBySignal(context.Background())
+	sincStop := make(chan struct{}, 1)
+	defer close(sincStop)
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
-	go rw.ReadRoutine(ctx, wg, conn, os.Stdout)
-	go rw.WriteRoutine(ctx, wg, conn, os.Stdin)
+	ctx := rw.StopSynchronizer(context.Background(), wg, sincStop)
+	go rw.ReadRoutine(ctx, wg, conn, os.Stdout, func(){
+		sincStop <- struct{}{}
+		conn.Write([]byte("\n"))
+	})
+	go rw.WriteRoutine(ctx, wg, conn, os.Stdin, func(){
+		sincStop <- struct{}{}
+	})
 	wg.Wait()
 
 	log.Printf("Closing connection with %s", conn.RemoteAddr())
