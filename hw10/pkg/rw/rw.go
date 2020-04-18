@@ -16,23 +16,21 @@ import (
 func ReadRoutine(ctx context.Context, wg *sync.WaitGroup, conn net.Conn, out io.Writer, stopWriteRoutine func()) {
 	defer wg.Done()
 	scanner := bufio.NewScanner(conn)
-	//writer := bufio.NewWriter(out)
 OUTER:
 	for {
 		select {
 		case <-ctx.Done():
-			log.Printf("ReadRoutine: ctx.Done()\n")
+			//log.Printf("ReadRoutine: ctx.Done()\n")
 			break OUTER
 		default:
 			if !scanner.Scan() {
-				log.Printf("CANNOT SCAN\n")
+				//log.Printf("CANNOT SCAN\n")
 				stopWriteRoutine()
 				break OUTER
 			}
 			s := scanner.Text()
-			log.Printf("ReadRoutine read: %v\n", s)
+			//log.Printf("ReadRoutine read: %v\n", s)
 			io.WriteString(out, s + "\n")
-			//writer.WriteString(s)
 
 			if err := scanner.Err(); err != nil {
 				log.Printf("ReadRoutine: error happend: %v\n", err)
@@ -46,26 +44,23 @@ OUTER:
 func WriteRoutine(ctx context.Context, wg *sync.WaitGroup, conn net.Conn, in io.Reader, stopReadRoutine func()) {
 	defer wg.Done()
 	scanner := bufio.NewScanner(in)
-	//writer := bufio.NewWriter(conn)
 OUTER:
 	for {
 		select {
 		case <-ctx.Done():
-			log.Printf("ReadRoutine: ctx.Done()\n")
+			//log.Printf("ReadRoutine: ctx.Done()\n")
 			break OUTER
 		default:
 			if !scanner.Scan() {
-				log.Printf("CANNOT SCAN\n")
+				//log.Printf("CANNOT SCAN\n")
 				stopReadRoutine()
 				break OUTER
 			}
-			log.Printf("scan\n")
+			//log.Printf("scan\n")
 			s := scanner.Text()
 			conn.Write([]byte(s + "\n"))
 
-			log.Printf("WriteRoutine write: %v\n", s)
-			//io.WriteString(conn, s)
-			//writer.WriteString(s)
+			//log.Printf("WriteRoutine write: %v\n", s)
 
 			if err := scanner.Err(); err != nil {
 				log.Printf("WriteRoutine: error happend: %v\n", err)
@@ -89,11 +84,11 @@ func StopSynchronizer(ctx context.Context, wg *sync.WaitGroup, sincStop chan str
 			select {
 			case s := <- c:
 			if s != nil {
-				log.Printf("Got siognal: %v\n", s)
+				//log.Printf("Got siognal: %v\n", s)
 				break OUTER
 			}
 			case <- sincStop:
-				log.Printf("Got sincStop siognal\n")
+				//log.Printf("Got sincStop siognal\n")
 				break OUTER
 			}
 		}
