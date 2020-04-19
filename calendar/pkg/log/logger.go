@@ -2,7 +2,6 @@ package log
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -31,12 +30,22 @@ type ILogger interface {
 	Infof(format string, args ...interface{})
 	// Errorf uses fmt.Sprintf to construct and log a message at ERROR level
 	Errorf(format string, args ...interface{})
+	// Sync synchronises logging
+	Sync() error
+	// Print uses fmt.Sprint to construct and log a message at DEBUG level
+	Print(v ...interface{})
 }
 
 // Logger struct
 type Logger struct {
 	*zap.SugaredLogger
 }
+
+// Print for log interface
+func (l *Logger) Print(v ...interface{}) {
+	l.Debug(v)
+}
+
 
 type contextKey int
 
@@ -77,12 +86,6 @@ func New(conf config.Log) (*Logger, error) {
 
 	logger := NewWithZap(zapLogger)
 
-	defer func() {
-		err := logger.Sync()
-		if err != nil {
-			log.Println(err.Error())
-		}
-	}()
 
 	logger.Info("Logger construction succeeded")
 	return logger, nil

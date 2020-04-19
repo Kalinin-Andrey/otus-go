@@ -1,18 +1,18 @@
 module github.com/Kalinin-Andrey/otus-go/calendar
 
-go 1.13
+go 1.14
 
 require (
-	github.com/go-ozzo/ozzo-dbx v1.5.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-ozzo/ozzo-routing/v2 v2.3.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.1.0
-	github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2
 	github.com/google/uuid v1.1.1
 	github.com/heetch/confita v0.9.0
-	github.com/inconshreveable/log15 v0.0.0-20200109203555-b30bc20e4fd1 // indirect
-	github.com/lib/pq v1.3.0
+	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
+	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
+	github.com/jinzhu/gorm v1.9.12
 	github.com/pkg/errors v0.9.1
-	github.com/qiangxue/go-rest-api v1.0.1
-	github.com/ulule/deepcopier v0.0.0-20200117111125-792cfb847af8
-	go.uber.org/zap v1.14.0
+	github.com/stretchr/testify v1.4.0
+	go.uber.org/zap v1.14.1
+	golang.org/x/crypto v0.0.0-20200317142112-1b76d66859c6
 )

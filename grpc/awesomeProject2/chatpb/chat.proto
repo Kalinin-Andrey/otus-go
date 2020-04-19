@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package chat;
+
+message ChatMessage {
+    int64 id = 1;
+    string text = 2;
+    google.protobuf.Timestamp created = 3;
+}
+
+service ChatExample {
+    rpc sendMessage (ChatMessage) returns (ChatMessage);
+}
