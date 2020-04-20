@@ -14,10 +14,12 @@ func handleConnection(conn net.Conn) {
 	conn.Write([]byte(fmt.Sprintf("Welcome to %s, friend from %s\n", conn.LocalAddr(), conn.RemoteAddr())))
 
 	sincStop := make(chan struct{}, 1)
-	//defer close(sincStop)
+	defer close(sincStop)
+
 	ctx := rw.StopSynchronizer(context.Background(), sincStop)
 	go rw.ReadRoutine(ctx, conn, os.Stdout, func(){
 		sincStop <- struct{}{}
+		conn.Write([]byte("\n"))
 	})
 	go rw.WriteRoutine(ctx, conn, os.Stdin, func(){
 		sincStop <- struct{}{}

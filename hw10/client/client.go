@@ -1,14 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"flag"
-	"github.com/Kalinin-Andrey/otus-go/hw10/pkg/rw"
+	"io"
 	"log"
 	"net"
 	"os"
+	"os/signal"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -42,24 +43,129 @@ func main() {
 		log.Fatal("requared params: host port")
 	}
 
-	sincStop := make(chan struct{}, 1)
-	defer close(sincStop)
-	wg := &sync.WaitGroup{}
-	wg.Add(2)
-	ctx := rw.StopSynchronizer(context.Background(), wg, sincStop)
+	c := NewClient(context.Background(),"tcp", pars[0] + ":" + pars[1], timeout, os.Stdin, os.Stdout)
 
-	conn, err := net.DialTimeout("tcp", pars[0] + ":" + pars[1], timeout)
+	c.Run()
+}
+
+type client struct {
+	network		string
+	address		string
+	timeout		time.Duration
+	in			io.Reader
+	out			io.Writer
+	conn		net.Conn
+	sincStop	chan struct{}
+	ctx			context.Context
+	finish		context.CancelFunc
+}
+
+func NewClient(ctx context.Context, network string, address string, timeout time.Duration, in io.Reader, out io.Writer) *client {
+	return &client{
+		network:		network,
+		address:		address,
+		timeout:		timeout,
+		in:				in,
+		out:			out,
+		sincStop:		make(chan struct{}, 1),
+		ctx:			ctx,
+	}
+}
+
+// Run a client
+func (c *client) Run() {
+	defer close(c.sincStop)
+	c.StopSynchronizer()
+
+	conn, err := net.DialTimeout(c.network, c.address, c.timeout)
 	if err != nil {
 		log.Fatalf("Cannot connect: %v", err)
 	}
-	defer conn.Close()
-	go rw.ReadRoutine(ctx, wg, conn, os.Stdout, func(){
-		sincStop <- struct{}{}
-		conn.Write([]byte("\n"))
-	})
-	go rw.WriteRoutine(ctx, wg, conn, os.Stdin, func(){
-		sincStop <- struct{}{}
-	})
-	wg.Wait()
+	c.conn = conn
+	defer c.conn.Close()
+
+	go c.readRoutine()
+	go c.writeRoutine()
+	<- c.ctx.Done()
 	log.Println("Client completed work")
+}
+
+// Stop a client
+func (c *client) Stop() {
+	c.sincStop <- struct{}{}
+}
+
+// readRoutine func is read from conn and write to out
+func (c *client) readRoutine() {
+	scanner := bufio.NewScanner(c.conn)
+OUTER:
+	for {
+		select {
+		case <-c.ctx.Done():
+			break OUTER
+		default:
+			if !scanner.Scan() {
+				c.Stop()
+				break OUTER
+			}
+			s := scanner.Text()
+			io.WriteString(c.out, s + "\n")
+
+			if err := scanner.Err(); err != nil {
+				log.Printf("ReadRoutine: error happend: %v\n", err)
+			}
+		}
+	}
+	log.Printf("ReadRoutine has finished\n")
+}
+
+// writeRoutine ir read from in and write in conn
+func (c *client) writeRoutine() {
+	scanner := bufio.NewScanner(c.in)
+OUTER:
+	for {
+		select {
+		case <-c.ctx.Done():
+			break OUTER
+		default:
+			if !scanner.Scan() {
+				c.Stop()
+				break OUTER
+			}
+			s := scanner.Text()
+			c.conn.Write([]byte(s + "\n"))
+
+			if err := scanner.Err(); err != nil {
+				log.Printf("WriteRoutine: error happend: %v\n", err)
+			}
+		}
+
+	}
+	log.Printf("WriteRoutine has finished\n")
+}
+
+// StopSynchronizer synchronize a stoppage of script
+func (c *client) StopSynchronizer() {
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch)
+	c.ctx, c.finish = context.WithCancel(c.ctx)
+	go func() {
+		defer func() {
+			signal.Stop(ch)
+			//close(c) // ?
+		}()
+	OUTER:
+		for {
+			select {
+			case s := <- ch:
+				if s != nil {
+					break OUTER
+				}
+			case <- c.sincStop:
+				break OUTER
+			}
+		}
+		c.finish()
+		log.Println("StopSynchronizer has finished")
+	}()
 }

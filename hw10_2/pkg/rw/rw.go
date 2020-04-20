@@ -14,57 +14,37 @@ import (
 // ReadRoutine func is read from conn and write to out
 func ReadRoutine(ctx context.Context, conn net.Conn, out io.Writer, stopWriteRoutine func()) {
 	scanner := bufio.NewScanner(conn)
-OUTER:
-	for {
-		select {
-		case <-ctx.Done():
-			//log.Printf("ReadRoutine: ctx.Done()\n")
-			break OUTER
-		default:
-			if !scanner.Scan() {
-				//log.Printf("CANNOT SCAN\n")
-				stopWriteRoutine()
-				break OUTER
-			}
-			s := scanner.Text()
-			//log.Printf("ReadRoutine read: %v\n", s)
-			io.WriteString(out, s + "\n")
 
-			if err := scanner.Err(); err != nil {
-				log.Printf("ReadRoutine: error happend: %v\n", err)
-			}
+	for scanner.Scan() {
+		s := scanner.Text()
+		log.Printf("ReadRoutine read: %v\n", s)
+		io.WriteString(out, s + "\n")
+
+		if err := scanner.Err(); err != nil {
+			log.Printf("ReadRoutine: error happend: %v\n", err)
 		}
 	}
+	//stopWriteRoutine()
 	log.Printf("ReadRoutine has finished\n")
 }
 
 // WriteRoutine ir read from in and write in conn
 func WriteRoutine(ctx context.Context, conn net.Conn, in io.Reader, stopReadRoutine func()) {
 	scanner := bufio.NewScanner(in)
-OUTER:
-	for {
-		select {
-		case <-ctx.Done():
-			//log.Printf("ReadRoutine: ctx.Done()\n")
-			break OUTER
-		default:
-			if !scanner.Scan() {
-				//log.Printf("CANNOT SCAN\n")
-				stopReadRoutine()
-				break OUTER
-			}
-			//log.Printf("scan\n")
-			s := scanner.Text()
-			conn.Write([]byte(s + "\n"))
 
-			//log.Printf("WriteRoutine write: %v\n", s)
+	for scanner.Scan() {
+		log.Printf("scan\n")
+		s := scanner.Text()
+		conn.Write([]byte(s + "\n"))
 
-			if err := scanner.Err(); err != nil {
-				log.Printf("WriteRoutine: error happend: %v\n", err)
-			}
+		log.Printf("WriteRoutine write: %v\n", s)
+
+		if err := scanner.Err(); err != nil {
+			log.Printf("WriteRoutine: error happend: %v\n", err)
 		}
 
 	}
+	//stopReadRoutine()
 	log.Printf("WriteRoutine has finished\n")
 }
 
@@ -76,7 +56,7 @@ func StopSynchronizer(ctx context.Context, sincStop chan struct{}, sig ...os.Sig
 	go func() {
 		defer func() {
 			signal.Stop(c)
-			//close(c) // ?
+			close(c) // ?
 		}()
 	OUTER:
 		for {
