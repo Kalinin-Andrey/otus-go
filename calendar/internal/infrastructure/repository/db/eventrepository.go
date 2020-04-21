@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-
 	"github.com/pkg/errors"
 
 	"github.com/jinzhu/gorm"
@@ -49,10 +48,16 @@ func (r EventRepository) First(ctx context.Context, entity *event.Event) (*event
 }
 
 // Query retrieves records with the specified offset and limit from the database.
-func (r EventRepository) Query(ctx context.Context, offset, limit uint) ([]event.Event, error) {
+func (r EventRepository) Query(ctx context.Context, query *event.QueryCondition, offset, limit uint) ([]event.Event, error) {
 	var items []event.Event
 
-	err := r.dbWithContext(ctx, r.dbWithDefaults()).Find(&items).Error
+	db := r.dbWithContext(ctx, r.dbWithDefaults())
+
+	if query != nil && query.Where != nil && query.Where.Time != nil && query.Where.Time.Between != nil {
+		db = db.Where("time BETWEEN ? AND ?", query.Where.Time.Between[0], query.Where.Time.Between[1])
+	}
+
+	err := db.Find(&items).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return items, apperror.ErrNotFound

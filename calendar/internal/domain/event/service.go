@@ -17,7 +17,7 @@ type IService interface {
 	Get(ctx context.Context, id uint) (*Event, error)
 	First(ctx context.Context, entity *Event) (*Event, error)
 	Query(ctx context.Context, offset, limit uint) ([]Event, error)
-	List(ctx context.Context) ([]Event, error)
+	List(ctx context.Context, condition *QueryCondition) ([]Event, error)
 	//Count(ctx context.Context) (uint, error)
 	Create(ctx context.Context, entity *Event) error
 	Update(ctx context.Context, entity *Event) error
@@ -70,7 +70,7 @@ func (s service) Count(ctx context.Context) (uint, error) {
 
 // Query returns the items with the specified offset and limit.
 func (s service) Query(ctx context.Context, offset, limit uint) ([]Event, error) {
-	items, err := s.repo.Query(ctx, offset, limit)
+	items, err := s.repo.Query(ctx, nil, offset, limit)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Can not find a list of products by ctx")
 	}
@@ -79,8 +79,8 @@ func (s service) Query(ctx context.Context, offset, limit uint) ([]Event, error)
 
 
 // List returns the items list.
-func (s service) List(ctx context.Context) ([]Event, error) {
-	items, err := s.repo.Query(ctx, 0, MaxLIstLimit)
+func (s service) List(ctx context.Context, query *QueryCondition) ([]Event, error) {
+	items, err := s.repo.Query(ctx, query, 0, MaxLIstLimit)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Can not find a list of products by ctx")
 	}

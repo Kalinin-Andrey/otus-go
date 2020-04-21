@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -34,6 +35,9 @@ func RegisterEventHandlers(r *routing.RouteGroup, service event.IService, logger
 	}
 
 	r.Get("/event", c.list)
+	r.Get("/event/on-day", c.dailyList)
+	r.Get("/event/on-week", c.weeklyList)
+	r.Get("/event/on-month", c.monthlyList)
 	r.Get(`/event/<id:\d+>`, c.get)
 	r.Post("/event", c.create)
 	r.Put(`/event/<id:\d+>`, c.update)
@@ -61,10 +65,51 @@ func (c eventController) get(ctx *routing.Context) error {
 	return ctx.Write(entity)
 }
 
+func (c eventController) dailyList(ctx *routing.Context) error {
+	t := time.Now()
+	return c.listFromTill(ctx, t, t.AddDate(0, 0, 1))
+}
+
+func (c eventController) weeklyList(ctx *routing.Context) error {
+	t := time.Now()
+	return c.listFromTill(ctx, t, t.AddDate(0, 0, 7))
+}
+
+func (c eventController) monthlyList(ctx *routing.Context) error {
+	t := time.Now()
+	return c.listFromTill(ctx, t, t.AddDate(0, 1, 0))
+}
+
+func (c eventController) listFromTill(ctx *routing.Context, from time.Time, till time.Time) error {
+
+	condition := &event.QueryCondition{
+		Where: &event.WhereCondition{
+			Time: &event.WhereConditionTime{
+				Between: &[2]time.Time{
+					from,
+					till,
+				},
+			},
+		},
+	}
+
+	items, err := c.Service.List(ctx.Request.Context(), condition)
+	if err != nil {
+		if err == apperror.ErrNotFound {
+			c.Logger.With(ctx.Request.Context()).Info(err)
+			return errorshandler.NotFound("")
+		}
+		c.Logger.With(ctx.Request.Context()).Error(err)
+		return errorshandler.InternalServerError("")
+	}
+	ctx.Response.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	return ctx.Write(items)
+}
+
 // list method is for a getting a list of entities
 func (c eventController) list(ctx *routing.Context) error {
 
-	items, err := c.Service.List(ctx.Request.Context())
+	items, err := c.Service.List(ctx.Request.Context(), nil)
 	if err != nil {
 		if err == apperror.ErrNotFound {
 			c.Logger.With(ctx.Request.Context()).Info(err)
@@ -114,7 +159,7 @@ func (c eventController) update(ctx *routing.Context) error {
 	}
 
 	ctx.Response.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	return ctx.WriteWithStatus(entity, http.StatusCreated)
+	return ctx.WriteWithStatus(entity, http.StatusOK)
 }
 
 

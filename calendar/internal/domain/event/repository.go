@@ -12,7 +12,7 @@ type IRepository interface {
 	// Count returns the number of entities.
 	//Count(ctx context.Context) (uint, error)
 	// Query returns the list of entities with the given offset and limit.
-	Query(ctx context.Context, offset, limit uint) ([]Event, error)
+	Query(ctx context.Context, query *QueryCondition, offset, limit uint) ([]Event, error)
 	SetDefaultConditions(conditions map[string]interface{})
 	// Create saves a new entity in the storage.
 	Create(ctx context.Context, entity *Event) error

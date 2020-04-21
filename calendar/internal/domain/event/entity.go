@@ -1,12 +1,13 @@
 package event
 
 import (
+	"encoding/json"
+	"github.com/pkg/errors"
 	"strconv"
 	"time"
 
 	"github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
-
 )
 
 // Event entity
@@ -16,7 +17,7 @@ type Event struct {
 	Title			string					`gorm:"type:varchar(100)" json:"title"`
 	Description		*string					`json:"description,omitempty"`
 	Time			time.Time				`sql:"index"`
-	Duration		time.Duration
+	Duration		time.Duration			`json:"duration"`
 	NoticePeriod	*time.Duration			`json:"noticePeriod,omitempty"`
 
 	CreatedAt		time.Time
@@ -28,6 +29,19 @@ const (
 	// TableName const
 	TableName	= "event"
 )
+
+// QueryCondition struct for defining a query condition
+type QueryCondition struct {
+	Where	*WhereCondition
+}
+
+type WhereCondition struct {
+	Time	*WhereConditionTime
+}
+
+type WhereConditionTime struct {
+	Between	*[2]time.Time
+}
 
 // Validate func
 func (e Event) Validate() error {
@@ -50,4 +64,46 @@ func New() *Event {
 // String func is a func for the Stringer interface
 func (e Event) String() string {
 	return "#" + strconv.FormatUint(uint64(e.ID), 10) + " " + e.Title + "(" + e.Time.String() + ")"
+}
+
+func (e *Event) UnmarshalJSON(data []byte) (err error) {
+	var tmp struct {
+		ID				uint
+		UserID			uint
+		Title			string
+		Description		*string
+		Time			string
+		Duration		string
+		NoticePeriod	*string
+	}
+	if err = json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+
+	e.ID		= tmp.ID
+	e.UserID	= tmp.UserID
+	e.Title		= tmp.Title
+	e.Time, err	= time.Parse(time.RFC3339, tmp.Time)
+	if err != nil {
+		return errors.Wrapf(err, "Can not parse time for a field Time: %v", tmp.Time)
+	}
+	duration, err := time.ParseDuration(tmp.Duration)
+	if err != nil {
+		return errors.Wrapf(err, "Can not parse duration for a field Duration: %v", tmp.Duration)
+	}
+	e.Duration	= duration
+
+	if tmp.Description != nil {
+		e.Description = tmp.Description
+	}
+
+	if tmp.NoticePeriod != nil {
+		noticePeriod, err := time.ParseDuration(*tmp.NoticePeriod)
+		if err != nil {
+			return errors.Wrapf(err, "Can not parse duration for a field NoticePeriod: %v", tmp.NoticePeriod)
+		}
+		e.NoticePeriod	= &noticePeriod
+	}
+
+	return err
 }

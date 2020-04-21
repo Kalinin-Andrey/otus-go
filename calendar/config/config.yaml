@@ -7,7 +7,7 @@ log:
     - "log/app.log"
   level:        "debug"
   initialfields:
-    app:        "rti-testing"
+    app:        "calendar"
 
 db:
   dialect:      "postgres"
