@@ -15,7 +15,7 @@ const MaxLIstLimit = 1000
 type IService interface {
 	NewEntity() *Event
 	Get(ctx context.Context, id uint) (*Event, error)
-	First(ctx context.Context, entity *Event) (*Event, error)
+	//First(ctx context.Context, entity *Event) (*Event, error)
 	Query(ctx context.Context, offset, limit uint) ([]Event, error)
 	List(ctx context.Context, condition *QueryCondition) ([]Event, error)
 	//Count(ctx context.Context) (uint, error)
@@ -33,7 +33,7 @@ type service struct {
 // NewService creates a new service.
 func NewService(repo IRepository, logger log.ILogger) IService {
 	s := &service{repo, logger}
-	repo.SetDefaultConditions(s.defaultConditions())
+	//repo.SetDefaultConditions(s.defaultConditions())
 	return s
 }
 
@@ -58,9 +58,9 @@ func (s service) Get(ctx context.Context, id uint) (*Event, error) {
 }
 
 // First returns an entity representing one new record
-func (s service) First(ctx context.Context, entity *Event) (*Event, error) {
+/*func (s service) First(ctx context.Context, entity *Event) (*Event, error) {
 	return s.repo.First(ctx, entity)
-}
+}*/
 
 /*
 // Count returns the number of items.

@@ -12,17 +12,14 @@ import (
 
 // Event entity
 type Event struct {
-	ID				uint					`gorm:"PRIMARY_KEY" json:"id"`
-	UserID			uint					`sql:"index" json:"userId"`
-	Title			string					`gorm:"type:varchar(100)" json:"title"`
+	ID				uint					`json:"id"`
+	UserID			uint					`db:"user_id" json:"userId"`
+	Title			string					`json:"title"`
 	Description		*string					`json:"description,omitempty"`
-	Time			time.Time				`sql:"index"`
+	Time			time.Time
 	Duration		time.Duration			`json:"duration"`
-	NoticePeriod	*time.Duration			`json:"noticePeriod,omitempty"`
+	NoticePeriod	*time.Duration			`db:"notice_period" json:"noticePeriod,omitempty"`
 
-	CreatedAt		time.Time
-	UpdatedAt		time.Time
-	DeletedAt		*time.Time				`sql:"index"`
 }
 
 const (

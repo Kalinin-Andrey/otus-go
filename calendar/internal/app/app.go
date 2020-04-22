@@ -6,7 +6,7 @@ import (
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/config"
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/log"
 
-	"github.com/Kalinin-Andrey/otus-go/calendar/internal/pkg/db"
+	"github.com/Kalinin-Andrey/otus-go/calendar/internal/pkg/dbx"
 
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/domain/event"
 	dbrep "github.com/Kalinin-Andrey/otus-go/calendar/internal/infrastructure/repository/db"

@@ -2,9 +2,12 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"github.com/pkg/errors"
 
-	"github.com/jinzhu/gorm"
+	_ "github.com/jackc/pgx/v4/stdlib"
+	//"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/domain/event"
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/pkg/apperror"
@@ -25,22 +28,14 @@ func NewEventRepository(repository *repository) (*EventRepository, error) {
 
 // Get reads entities with the specified ID from the database.
 func (r EventRepository) Get(ctx context.Context, id uint) (*event.Event, error) {
+	//var id int64
 	entity := &event.Event{}
 
-	err := r.dbWithDefaults().First(&entity, id).Error
+	//row := r.db.DB().QueryRowContext(ctx, "SELECT * FROM event WHERE id = $1", id)
+	//err := row.Scan(&entity.ID, &entity.UserID, &entity.Title, &entity.Description, &entity.Time, &entity.Duration, &entity.NoticePeriod)
+	err := r.db.DB().GetContext(ctx, entity, "SELECT * FROM event WHERE id = $1", id)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return entity, apperror.ErrNotFound
-		}
-	}
-	return entity, err
-}
-
-// First returns an entity representing a one first record
-func (r EventRepository) First(ctx context.Context, entity *event.Event) (*event.Event, error) {
-	err := r.db.DB().Where(entity).First(entity).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if err == sql.ErrNoRows {
 			return entity, apperror.ErrNotFound
 		}
 	}
@@ -51,15 +46,13 @@ func (r EventRepository) First(ctx context.Context, entity *event.Event) (*event
 func (r EventRepository) Query(ctx context.Context, query *event.QueryCondition, offset, limit uint) ([]event.Event, error) {
 	var items []event.Event
 
-	db := r.dbWithContext(ctx, r.dbWithDefaults())
-
-	if query != nil && query.Where != nil && query.Where.Time != nil && query.Where.Time.Between != nil {
-		db = db.Where("time BETWEEN ? AND ?", query.Where.Time.Between[0], query.Where.Time.Between[1])
+	if query == nil || query.Where == nil || query.Where.Time == nil || query.Where.Time.Between == nil {
+		return nil, errors.Errorf("invalid query param: %v", query)
 	}
 
-	err := db.Find(&items).Error
+	err := r.db.DB().SelectContext(ctx, &items, "SELECT * FROM event WHERE time BETWEEN $1 AND $2", query.Where.Time.Between[0], query.Where.Time.Between[1])
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if err == sql.ErrNoRows {
 			return items, apperror.ErrNotFound
 		}
 	}
@@ -68,28 +61,34 @@ func (r EventRepository) Query(ctx context.Context, query *event.QueryCondition,
 
 // Create saves a new entity in the database.
 func (r EventRepository) Create(ctx context.Context, entity *event.Event) error {
-
-	if !r.db.DB().NewRecord(entity) {
-		return errors.New("entity is not new")
+	var lastInsertId uint
+	err := r.db.DB().QueryRowContext(ctx, "INSERT INTO event (user_id, title, description, \"time\", duration, notice_period) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", entity.UserID, entity.Title, entity.Description, entity.Time, entity.Duration, entity.NoticePeriod).Scan(&lastInsertId)
+	if err != nil {
+		return errors.Wrapf(err, "EventRepository: error inserting entity %v", entity)
 	}
-	return r.db.DB().Create(entity).Error
+	/*id, err := res.LastInsertId()
+	if err != nil {
+		return errors.Wrapf(err, "EventRepository: error on LastInsertId() result: %v", res)
+	}*/
+	entity.ID = lastInsertId
+	return nil
 }
 
 // Update recoprd of entity in db
 func (r EventRepository) Update(ctx context.Context, entity *event.Event) error {
-
-	if r.db.DB().NewRecord(entity) {
-		return errors.New("entity is new")
+	_, err := r.db.DB().ExecContext(ctx, "UPDATE event SET user_id = $1, title = $2, description = $3, \"time\" = $4, duration = $5, notice_period = $6", entity.UserID, entity.Title, entity.Description, entity.Time, entity.Duration, entity.NoticePeriod)
+	if err != nil {
+		return errors.Wrapf(err, "EventRepository: error updating entity %v", entity)
 	}
-	return r.db.DB().Save(entity).Error
+	return nil
 }
 
 // Delete deletes a record with the specified ID from the database.
 func (r EventRepository) Delete(ctx context.Context, id uint) error {
-	entity, err := r.Get(ctx, id)
+	_, err := r.db.DB().ExecContext(ctx, "DELETE FROM event WHERE id = $1", id)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "EventRepository: error deleting record id = %v", id)
 	}
-	return r.db.DB().Delete(entity).Error
+	return nil
 }
 

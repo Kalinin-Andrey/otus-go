@@ -27,8 +27,8 @@ services:
         #image: app-postgres12.2:0.0.1
         # for pure postgres
         image: postgres:12.2
-        #volumes:
-        #    - ./data/postgres:/docker-entrypoint-initdb.d
+        volumes:
+            - ./data/postgres:/docker-entrypoint-initdb.d
         restart: always
         environment:
             PGDATA: /var/lib/postgresql-static/data
