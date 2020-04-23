@@ -13,6 +13,7 @@ import (
 type Configuration struct {
 	Server		struct {
 		HTTPListen	string			`config:"httplisten"`
+		GRPCisten	string			`config:"grpclisten"`
 	}								`config:"server"`
 	Log			Log					`config:"log"`
 	DB			DB					`config:"db"`

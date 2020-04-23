@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package calendar;
+
+option go_package = "calendarpb";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+service Calendar {
+
+    rpc EventCreate (Event) returns (ResponseEvent);
+    rpc EventUpdate (Event) returns (ResponseEvent);
+    rpc EventDelete (EventID) returns (Status);
+    rpc EventListOnDay (google.protobuf.Timestamp) returns (ResponseEvents);
+    rpc EventListOnWeek (google.protobuf.Timestamp) returns (ResponseEvents);
+    rpc EventListOnMonth (google.protobuf.Timestamp) returns (ResponseEvents);
+}
+
+message EventID {
+    uint64 ID   = 1;
+}
+
+message Status {
+    bool OK             = 1;
+    uint32 ErrorCode    = 2;
+    string Error        = 3;
+}
+
+message ResponseEvents {
+    Status status       = 1;
+    repeated Event list = 2;
+}
+
+message ResponseEvent {
+    Status status       = 1;
+    Event item          = 2;
+}
+
+message Event {
+    uint64 id           = 1;
+    uint64 user_id      = 2;
+    string title        = 3;
+    string description  = 4;
+    google.protobuf.Timestamp time          = 5;
+    google.protobuf.Duration duration       = 6;
+    google.protobuf.Duration notice_period  = 7;
+}
+
+message Notification {
+    uint64 event_id     = 1;
+    uint64 user_id      = 2;
+    string title        = 3;
+    google.protobuf.Timestamp time  = 4;
+}

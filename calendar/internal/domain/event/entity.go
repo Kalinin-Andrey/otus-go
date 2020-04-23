@@ -19,7 +19,6 @@ type Event struct {
 	Time			time.Time
 	Duration		time.Duration			`json:"duration"`
 	NoticePeriod	*time.Duration			`db:"notice_period" json:"noticePeriod,omitempty"`
-
 }
 
 const (

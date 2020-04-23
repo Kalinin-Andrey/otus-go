@@ -1,5 +1,6 @@
 server:
   httplisten:  "localhost:81"
+  grpclisten:  "localhost:101"
 
 log:
   encoding:     "json"

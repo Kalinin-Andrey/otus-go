@@ -1,4 +1,4 @@
-package api
+package rest
 
 import (
 	"log"
@@ -15,7 +15,7 @@ import (
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/errorshandler"
 
 	commonApp "github.com/Kalinin-Andrey/otus-go/calendar/internal/app"
-	"github.com/Kalinin-Andrey/otus-go/calendar/internal/app/api/controller"
+	"github.com/Kalinin-Andrey/otus-go/calendar/internal/app/rest/controller"
 )
 
 // Version of API

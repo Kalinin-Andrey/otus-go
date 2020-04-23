@@ -10,7 +10,7 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/domain/event"
-	"github.com/Kalinin-Andrey/otus-go/calendar/internal/pkg/apperror"
+	"github.com/Kalinin-Andrey/otus-go/calendar/internal/pkg/apperror/apperror"
 )
 
 // EventRepository is a repository for the event entity

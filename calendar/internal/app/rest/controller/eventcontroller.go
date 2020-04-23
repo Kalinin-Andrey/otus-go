@@ -11,7 +11,7 @@ import (
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/errorshandler"
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/log"
 
-	"github.com/Kalinin-Andrey/otus-go/calendar/internal/pkg/apperror"
+	"github.com/Kalinin-Andrey/otus-go/calendar/internal/pkg/apperror/apperror"
 
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/domain/event"
 )
@@ -44,7 +44,7 @@ func RegisterEventHandlers(r *routing.RouteGroup, service event.IService, logger
 	r.Delete(`/event/<id:\d+>`, c.delete)
 }
 
-// get method is for a getting a one enmtity by ID
+// get method is for a getting a one entity by ID
 func (c eventController) get(ctx *routing.Context) error {
 	id, err := c.parseUint(ctx, "id")
 	if err != nil {
