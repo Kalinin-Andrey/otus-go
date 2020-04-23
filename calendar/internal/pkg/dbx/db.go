@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"time"
 
+	// pq is the driver for the postgres dialect
 	_ "github.com/lib/pq"
 	//_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
@@ -28,6 +29,7 @@ func (db *DB) DB() *sqlx.DB {
 	return db.db
 }
 
+// Close connection
 func (db *DB) Close() error {
 	return db.db.Close()
 }

@@ -5,8 +5,7 @@ import (
 	"database/sql"
 	"github.com/pkg/errors"
 
-	_ "github.com/jackc/pgx/v4/stdlib"
-	//"github.com/jmoiron/sqlx"
+	//_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/lib/pq"
 
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/domain/event"
@@ -61,8 +60,8 @@ func (r EventRepository) Query(ctx context.Context, query *event.QueryCondition,
 
 // Create saves a new entity in the database.
 func (r EventRepository) Create(ctx context.Context, entity *event.Event) error {
-	var lastInsertId uint
-	err := r.db.DB().QueryRowContext(ctx, "INSERT INTO event (user_id, title, description, \"time\", duration, notice_period) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", entity.UserID, entity.Title, entity.Description, entity.Time, entity.Duration, entity.NoticePeriod).Scan(&lastInsertId)
+	var lastInsertID uint
+	err := r.db.DB().QueryRowContext(ctx, "INSERT INTO event (user_id, title, description, \"time\", duration, notice_period) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", entity.UserID, entity.Title, entity.Description, entity.Time, entity.Duration, entity.NoticePeriod).Scan(&lastInsertID)
 	if err != nil {
 		return errors.Wrapf(err, "EventRepository: error inserting entity %v", entity)
 	}
@@ -70,7 +69,7 @@ func (r EventRepository) Create(ctx context.Context, entity *event.Event) error 
 	if err != nil {
 		return errors.Wrapf(err, "EventRepository: error on LastInsertId() result: %v", res)
 	}*/
-	entity.ID = lastInsertId
+	entity.ID = lastInsertID
 	return nil
 }
 

@@ -30,11 +30,11 @@ const (
 type QueryCondition struct {
 	Where	*WhereCondition
 }
-
+// WhereCondition struct
 type WhereCondition struct {
 	Time	*WhereConditionTime
 }
-
+// WhereConditionTime struct
 type WhereConditionTime struct {
 	Between	*[2]time.Time
 }
@@ -61,7 +61,7 @@ func New() *Event {
 func (e Event) String() string {
 	return "#" + strconv.FormatUint(uint64(e.ID), 10) + " " + e.Title + "(" + e.Time.String() + ")"
 }
-
+// UnmarshalJSON is unmarshal func for an entity
 func (e *Event) UnmarshalJSON(data []byte) (err error) {
 	var tmp struct {
 		ID				uint
