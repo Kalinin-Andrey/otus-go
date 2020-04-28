@@ -16,7 +16,7 @@ import (
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/pkg/apperror/apperror"
 )
 
-
+// NotificationController struct
 type NotificationController struct {
 	ctx				context.Context
 	Logger			log.ILogger
@@ -24,8 +24,10 @@ type NotificationController struct {
 	EventService	event.IService
 }
 
+// NotificationChannelSize const
 const NotificationChannelSize = 100
 
+// NewNotificationController returns a pointer to a new NotificationController obj
 func NewNotificationController(ctx context.Context, eventService event.IService, logger	log.ILogger, queue rabbitmq.QueueClient) *NotificationController {
 	return &NotificationController{
 		ctx:			ctx,
@@ -35,8 +37,8 @@ func NewNotificationController(ctx context.Context, eventService event.IService,
 	}
 }
 
-
-func (c *NotificationController) RegisterQueueHandler() *chan notification.Notification {
+// RegisterQueueHandler registers handler for the queue and returns channel of Notification
+func (c *NotificationController) RegisterQueueHandler() chan notification.Notification {
 	ch := make(chan notification.Notification, NotificationChannelSize)
 
 	c.queue.Handle(func(deliveryChan <- chan amqp.Delivery) {
@@ -44,11 +46,12 @@ func (c *NotificationController) RegisterQueueHandler() *chan notification.Notif
 		for d := range deliveryChan {
 			ch <- c.deliveryToNotification(d)
 		}
-		c.Logger.Debug("deliveryChan was closed, stop handler") // @todo: отладить и проверить
+		c.Logger.Debug("deliveryChan was closed, stop handler")
 	}, 1)
-	return &ch
+	return ch
 }
 
+// deliveryToNotification convs delivery to notification
 func (c *NotificationController) deliveryToNotification(d amqp.Delivery) notification.Notification {
 	n := &notification.Notification{}
 
@@ -60,6 +63,7 @@ func (c *NotificationController) deliveryToNotification(d amqp.Delivery) notific
 	return *n
 }
 
+// Schedule gets notifications and send they in queue
 func (c *NotificationController) Schedule() error {
 
 	// Сделать выборку Event
@@ -88,13 +92,14 @@ func (c *NotificationController) Schedule() error {
 	return nil
 }
 
+// Send is sends Notification obj
 func (c *NotificationController) Send(n notification.Notification) {
 	b, err := json.Marshal(n)
 	if err != nil {
 		c.Logger.Errorf("can not send, Marshal error: %v", err)
 	}
 	// "send" the message
-	c.Logger.Debugf(string(b))
+	c.Logger.Debugf(" [ <- q] Sent notification to user: %s", string(b))
 }
 
 

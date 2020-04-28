@@ -27,7 +27,7 @@ type Configuration struct {
 	JWTExpiration int				`yaml:"jwt_expiration" config:"JWT_EXPIRATION"`
 }
 
-// Log is config for a logger
+// Log is a config for a logger
 type Log struct {
 	Encoding		string
 	OutputPaths		[]string		`config:"outputPaths"`
@@ -35,24 +35,25 @@ type Log struct {
 	InitialFields	map[string]interface{}	`config:"initialFields"`
 }
 
-// DB is config for a DB connection
+// DB is a config for a DB connection
 type DB struct {
 	Dialect		string				`config:"dialect"`
 	DSN			string				`config:"dsn"`
 }
 
-
+// Queue is a config for a queue
 type Queue struct {
 	RabbitMQ	RabbitMQ
 }
 
+// RabbitMQ is a config for a connection to a RabbitMQ host
 type RabbitMQ struct {
-	ConsumerTag		string		`yaml:"consumer_tag"`
-	Uri				string
-	ExchangeName	string		`yaml:"exchange_name"`
-	ExchangeType	string		`yaml:"exchange_type"`
-	Queue			string
-	BindingKey		string		`yaml:"binding_key"`
+	ConsumerTag  string		`yaml:"consumer_tag"`
+	URI          string
+	ExchangeName string		`yaml:"exchange_name"`
+	ExchangeType string		`yaml:"exchange_type"`
+	Queue        string
+	BindingKey   string		`yaml:"binding_key"`
 }
 
 // defaultPathToConfig is the default path to the app config

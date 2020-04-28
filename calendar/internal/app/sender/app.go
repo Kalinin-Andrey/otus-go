@@ -64,7 +64,7 @@ OUTER:
 		select {
 		case <- app.Ctx.Done():
 			break OUTER
-		case n, ok := <- *ch:
+		case n, ok := <- ch:
 			if ok == false {
 				break OUTER
 			}

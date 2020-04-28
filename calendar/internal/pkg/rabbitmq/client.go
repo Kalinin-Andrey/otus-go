@@ -14,13 +14,14 @@ import (
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/log"
 )
 
+// QueueClient interface
 type QueueClient interface {
 	Publish(body []byte) error
 	Handle(fn func(<-chan amqp.Delivery), threads int) error
 	Close() error
 }
 
-// Client ...
+// Client for RabbitMQ
 type Client struct {
 	ctx				context.Context
 	clientType			uint
@@ -38,7 +39,9 @@ type Client struct {
 }
 
 const (
+	// TypePublisher const is value of type for a publisher
 	TypePublisher	= 0
+	// TypeConsumer const is value of type for a consumer
 	TypeConsumer	= 1
 )
 
@@ -46,6 +49,7 @@ var _ QueueClient = (*Client)(nil)
 
 var defaultExchangeType = amqp.ExchangeDirect
 
+// NewClient returns a new instance of the Client
 func NewClient(ctx context.Context, logger log.ILogger, conf config.RabbitMQ, clientType uint) (*Client, error) {
 	exchangeType	:= conf.ExchangeType
 	if conf.ExchangeType == "" {
@@ -58,7 +62,7 @@ func NewClient(ctx context.Context, logger log.ILogger, conf config.RabbitMQ, cl
 		clientType:		clientType,
 		logger:			logger.With(ctx),
 		consumerTag:	conf.ConsumerTag,
-		uri:			conf.Uri,
+		uri:			conf.URI,
 		exchangeName:	conf.ExchangeName,
 		exchangeType:	exchangeType,
 		queue:			conf.Queue,
@@ -200,6 +204,7 @@ func (c *Client) connect() error {
 	return nil
 }
 
+// Handle queue
 func (c *Client) Handle(fn func(<-chan amqp.Delivery), threads int) error {
 
 	go func() {
@@ -219,7 +224,7 @@ func (c *Client) Handle(fn func(<-chan amqp.Delivery), threads int) error {
 	return nil
 }
 
-
+// Close a Client obj
 func (c *Client) Close() error {
 	if c.conn == nil {
 		return nil
@@ -227,7 +232,7 @@ func (c *Client) Close() error {
 	return c.conn.Close()
 }
 
-
+// Publish in queue
 func (c *Client) Publish(body []byte) error {
 
 	err := c.getAmqpChannel().Publish(
@@ -242,7 +247,7 @@ func (c *Client) Publish(body []byte) error {
 	if err != nil {
 		return errors.Wrapf(err, "Failed to publish a message")
 	}
-	c.logger.Debugf(" [x] Sent %s", body)
+	c.logger.Debugf(" [q <- ] Sent to queue %s", body)
 	return nil
 }
 
