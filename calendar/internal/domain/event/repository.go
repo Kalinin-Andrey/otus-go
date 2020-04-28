@@ -18,5 +18,7 @@ type IRepository interface {
 	Update(ctx context.Context, entity *Event) error
 	// Delete removes an entity with given ID from the storage.
 	Delete(ctx context.Context, id uint) error
+	// ListForNotifications returns list of events for notification
+	ListForNotifications(ctx context.Context, offset, limit uint) ([]Event, error)
 }
 

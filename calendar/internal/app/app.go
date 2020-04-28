@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/pkg/errors"
 	golog "log"
 
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/config"
@@ -48,7 +49,7 @@ func New(cfg config.Configuration) *App {
 
 	db, err := db.New(cfg.DB, logger)
 	if err != nil {
-		panic(err)
+		panic(errors.Wrap(err, "can not connect to DB"))
 	}
 
 	app := &App{

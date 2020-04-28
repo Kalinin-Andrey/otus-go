@@ -12,11 +12,12 @@ import (
 // Configuration is the struct for app configuration
 type Configuration struct {
 	Server		struct {
-		HTTPListen	string			`config:"httplisten"`
-		GRPCisten	string			`config:"grpclisten"`
+		HTTPListen string			`config:"httplisten"`
+		GRPCListen string			`config:"grpclisten"`
 	}								`config:"server"`
 	Log			Log					`config:"log"`
 	DB			DB					`config:"db"`
+	Queue		Queue				`config:"queue"`
 	Repository	struct {
 		Type		string			`config:"type"`
 	}								`config:"repository"`
@@ -38,6 +39,20 @@ type Log struct {
 type DB struct {
 	Dialect		string				`config:"dialect"`
 	DSN			string				`config:"dsn"`
+}
+
+
+type Queue struct {
+	RabbitMQ	RabbitMQ
+}
+
+type RabbitMQ struct {
+	ConsumerTag		string		`yaml:"consumer_tag"`
+	Uri				string
+	ExchangeName	string		`yaml:"exchange_name"`
+	ExchangeType	string		`yaml:"exchange_type"`
+	Queue			string
+	BindingKey		string		`yaml:"binding_key"`
 }
 
 // defaultPathToConfig is the default path to the app config

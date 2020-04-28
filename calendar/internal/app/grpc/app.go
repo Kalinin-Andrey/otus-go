@@ -28,7 +28,7 @@ func New(commonApp *commonApp.App, cfg config.Configuration) *App {
 	app := &App{
 		App:	commonApp,
 		Server:	grpc.NewServer(),
-		Address: cfg.Server.GRPCisten,
+		Address: cfg.Server.GRPCListen,
 	}
 
 	c := controller.EventController{

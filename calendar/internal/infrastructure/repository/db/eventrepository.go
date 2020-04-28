@@ -91,3 +91,18 @@ func (r EventRepository) Delete(ctx context.Context, id uint) error {
 	return nil
 }
 
+
+// ListForNotifications returns list of events for notification
+func (r EventRepository) ListForNotifications(ctx context.Context, offset, limit uint) ([]event.Event, error) {
+	var items []event.Event
+
+	// Now() >= e.Time - e.NoticePeriod
+	err := r.db.DB().SelectContext(ctx, &items, "SELECT * FROM event WHERE \"time\" -  make_interval(0, 0, 0, 0, 0, 0, notice_period / 1000000000) <= now()")
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return items, apperror.ErrNotFound
+		}
+	}
+	return items, err
+}
+

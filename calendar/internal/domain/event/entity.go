@@ -2,6 +2,7 @@ package event
 
 import (
 	"encoding/json"
+	"github.com/Kalinin-Andrey/otus-go/calendar/internal/domain/notification"
 	"github.com/pkg/errors"
 	"strconv"
 	"time"
@@ -103,3 +104,14 @@ func (e *Event) UnmarshalJSON(data []byte) (err error) {
 
 	return err
 }
+
+// Notification returns a Notification object for a current Event object
+func (e Event) Notification() *notification.Notification {
+	return &notification.Notification{
+		EventID:	e.ID,
+		UserID:		e.UserID,
+		Title:		e.Title,
+		Time:		e.Time,
+	}
+}
+

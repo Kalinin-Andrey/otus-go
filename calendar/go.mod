@@ -3,6 +3,7 @@ module github.com/Kalinin-Andrey/otus-go/calendar
 go 1.14
 
 require (
+	github.com/cenkalti/backoff/v3 v3.2.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-ozzo/ozzo-routing/v2 v2.3.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.1.0
@@ -17,6 +18,7 @@ require (
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/lib/pq v1.4.0
 	github.com/pkg/errors v0.9.1
+	github.com/streadway/amqp v0.0.0-20200108173154-1c71cc93ed71
 	github.com/stretchr/testify v1.5.1
 	go.uber.org/zap v1.14.1
 	golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59

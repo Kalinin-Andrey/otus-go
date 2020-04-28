@@ -5,6 +5,7 @@ server:
 log:
   encoding:     "json"
   outputpaths:
+    - "stdout"
     - "log/app.log"
   level:        "debug"
   initialfields:
@@ -14,8 +15,14 @@ db:
   dialect:      "postgres"
   dsn:          "host=localhost port=5401 dbname=postgres user=postgres password=postgres sslmode=disable"
 
-repository:
-  type:       "db"
+queue:
+  rabbitmq:
+    consumer_tag:   "sender"
+    uri:            "amqp://guest:guest@localhost:5672"
+    exchange_name:  "calendar.Notice"
+    exchange_type:  ""
+    queue:          "calendar.Notice"
+    binding_key:    "calendar.Notice"
 
 jwt_signing_key: "LxsKJywDL5O5PvgODZhBH12KE6k2yL8E"
 jwt_expiration: 72
