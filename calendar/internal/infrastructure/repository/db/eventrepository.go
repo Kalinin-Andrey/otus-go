@@ -75,7 +75,7 @@ func (r EventRepository) Create(ctx context.Context, entity *event.Event) error 
 
 // Update recoprd of entity in db
 func (r EventRepository) Update(ctx context.Context, entity *event.Event) error {
-	_, err := r.db.DB().ExecContext(ctx, "UPDATE event SET user_id = $1, title = $2, description = $3, \"time\" = $4, duration = $5, notice_period = $6", entity.UserID, entity.Title, entity.Description, entity.Time, entity.Duration, entity.NoticePeriod)
+	_, err := r.db.DB().ExecContext(ctx, "UPDATE event SET user_id = $1, title = $2, description = $3, \"time\" = $4, duration = $5, notice_period = $6 WHERE id = $7", entity.UserID, entity.Title, entity.Description, entity.Time, entity.Duration, entity.NoticePeriod, entity.ID)
 	if err != nil {
 		return errors.Wrapf(err, "EventRepository: error updating entity %v", entity)
 	}
