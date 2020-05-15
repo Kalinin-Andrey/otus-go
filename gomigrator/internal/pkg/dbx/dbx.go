@@ -5,12 +5,12 @@ import (
 	"github.com/Kalinin-Andrey/otus-go/gomigrator/pkg/sqlmigrator/api"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/jmoiron/sqlx"
 	// pq is the driver for the postgres dialect
 	_ "github.com/lib/pq"
 )
+
+const ConnectionTimeout = time.Duration(30 * time.Second)
 
 // DBx is the interface for a DB connection
 type DBx interface {
@@ -65,10 +65,10 @@ func ConnectLoop(dialect string, dsn string, timeout time.Duration) (*sqlx.DB, e
 
 		case <-ticker.C:
 			db, err := sqlx.Connect(dialect, dsn)
-			if err != nil {
-				return nil, errors.Wrapf(err, "Can not connect to DB %s by DSN: %q", dialect, dsn)
+			if err == nil {
+				return db, nil
 			}
-			return db, nil
+			//errors.Wrapf(err, "Can not connect to DB %s by DSN: %q", dialect, dsn)
 		}
 	}
 }

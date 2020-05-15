@@ -1,9 +1,8 @@
 package main
 
 import (
-	"log"
-
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/config"
+	"log"
 
 	commonApp "github.com/Kalinin-Andrey/otus-go/calendar/internal/app"
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/app/rest"
@@ -13,7 +12,7 @@ import (
 func main() {
 	cfg, err := config.Get()
 	if err != nil {
-		log.Fatalln("Can not load the config")
+		log.Fatalf("Can not load the config, error: %v", err)
 	}
 	app := rest.New(commonApp.New(*cfg), *cfg)
 

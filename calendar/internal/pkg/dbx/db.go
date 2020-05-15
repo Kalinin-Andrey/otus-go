@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"time"
 
 	// pq is the driver for the postgres dialect
@@ -13,6 +12,9 @@ import (
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/config"
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/log"
 )
+
+// ConnectionTimeout is the default timeout for connection
+const ConnectionTimeout = time.Duration(30 * time.Second)
 
 // IDB is the interface for a DB connection
 type IDB interface {
@@ -39,7 +41,7 @@ var _ IDB = (*DB)(nil)
 // New creates a new DB connection
 func New(conf config.DB, logger log.ILogger) (*DB, error) {
 	//db, err := gorm.Open(conf.Dialect, conf.DSN)
-	db, err := ConnectLoop(conf.Dialect, conf.DSN, time.Duration(10 * time.Second))
+	db, err := ConnectLoop(conf.Dialect, conf.DSN, ConnectionTimeout)
 
 	if err != nil {
 		return nil, err
@@ -66,10 +68,10 @@ func ConnectLoop(dialect string, dsn string, timeout time.Duration) (*sqlx.DB, e
 
 		case <-ticker.C:
 			db, err := sqlx.Connect(dialect, dsn)
-			if err != nil {
-				return nil, errors.Wrapf(err, "Can not connect to db %s by dsn: %q", dialect, dsn)
+			if err == nil {
+				return db, nil
 			}
-			return db, nil
+			//errors.Wrapf(err, "Can not connect to db %s by dsn: %q", dialect, dsn)
 		}
 	}
 }

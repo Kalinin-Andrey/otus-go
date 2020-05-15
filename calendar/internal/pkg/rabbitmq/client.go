@@ -14,6 +14,9 @@ import (
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/log"
 )
 
+// DefaultTimeout is the default timeout for connection
+var DefaultTimeout time.Duration = 30 * time.Second
+
 // QueueClient interface
 type QueueClient interface {
 	Publish(body []byte) error
@@ -112,7 +115,8 @@ func (c *Client) reConnect() error {
 func (c *Client) connect() error {
 	var err error
 
-	c.conn, err = amqp.Dial(c.uri)
+	//c.conn, err = amqp.Dial(c.uri)
+	err = c.ConnectLoop(nil)
 	if err != nil {
 		return errors.Errorf("Dial err: %v", err)
 	}
@@ -249,6 +253,30 @@ func (c *Client) Publish(body []byte) error {
 	}
 	c.logger.Debugf(" [q <- ] Sent to queue %s", body)
 	return nil
+}
+
+// ConnectLoop is the func for connection in a loop with timeout
+func (c *Client) ConnectLoop(timeout *time.Duration) (err error) {
+	if timeout == nil {
+		timeout = &DefaultTimeout
+	}
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	timeoutExceeded := time.After(*timeout)
+	for {
+		select {
+		case <-timeoutExceeded:
+			return fmt.Errorf("db connection failed after %s timeout", *timeout)
+
+		case <-ticker.C:
+			c.conn, err = amqp.Dial(c.uri)
+			if err == nil {
+				return nil
+			}
+			c.logger.Debugf("Can not connect to RabbitMQ %s error: %v", c.uri, err)
+		}
+	}
 }
 
 
