@@ -35,6 +35,7 @@ func RegisterEventHandlers(r *routing.RouteGroup, service event.IService, logger
 	}
 
 	//r.Get("/event", c.list)
+	r.Get("/test", c.test)
 	r.Get("/event/on-day", c.dailyList)
 	r.Get("/event/on-week", c.weeklyList)
 	r.Get("/event/on-month", c.monthlyList)
@@ -45,6 +46,9 @@ func RegisterEventHandlers(r *routing.RouteGroup, service event.IService, logger
 }
 
 // get method is for a getting a one entity by ID
+func (c eventController) test(ctx *routing.Context) error {
+	return ctx.Write("test")
+}
 func (c eventController) get(ctx *routing.Context) error {
 	id, err := c.parseUint(ctx, "id")
 	if err != nil {

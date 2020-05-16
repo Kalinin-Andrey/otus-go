@@ -1,10 +1,15 @@
-FROM golang:1.13
+# example
+# docker run --rm -it --name gomigrator -p=5432:5432 -v ${pwd}/migration:/migration -e dsn="host=localhost port=5432 dbname=postgres user=postgres password=postgres sslmode=disable" gomigrator gomigrator --help
+FROM golang:1.14
 
 WORKDIR /go/src/app
 COPY . .
 
-RUN go get -v ./...
+RUN go get -d -v ./...
+RUN go install -v ./...
 
-EXPOSE 81
+# for mounting volume with migrations
+ENV dir="/migration"
 
-CMD ["server"]
+CMD ["gomigrator --help"]
+

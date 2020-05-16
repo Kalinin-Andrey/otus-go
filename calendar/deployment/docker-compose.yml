@@ -46,11 +46,10 @@ services:
         tty: true
         depends_on:
             - db
-            - queue
         expose:
-            - "81"
+            - "8881"
         ports:
-            - "81:81"
+            - "8881:8881"
         restart: always
 
     grpcapi:
@@ -63,11 +62,10 @@ services:
         tty: true
         depends_on:
             - db
-            - queue
         expose:
-            - "101"
+            - "8882"
         ports:
-            - "8888:101"
+            - "8888:8882"
         restart: always
 
     scheduler:
