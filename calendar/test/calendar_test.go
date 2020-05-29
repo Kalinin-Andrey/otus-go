@@ -11,6 +11,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/timestamp"
+
 	"github.com/pkg/errors"
 
 	"github.com/cucumber/godog"
@@ -169,22 +172,22 @@ func (c *calendarTest) iCreateEventWithUserIDTitleDescription(userID int, title,
 
 func (c *calendarTest) iReceiveStatusIsOK() error {
 	if !c.testResponses.recponseEvent.Status.OK {
-		return errors.Errorf("Expected status is OK, have receive status: %v", c.testResponses.recponseEvent.Status)
+		return errors.Errorf("Expected status is OK, have received status: %v", c.testResponses.recponseEvent.Status)
 	}
 	return nil
 }
 
 func (c *calendarTest) iReceiveEventWithIDAndUserIDTitleDescription(userID int, title, description string) error {
 	if uint64(userID) != c.testResponses.recponseEvent.Item.UserId {
-		return errors.Errorf("Expected userID: %v, have receive userID: %v", userID, c.testResponses.recponseEvent.Item.UserId)
+		return errors.Errorf("Expected userID: %v, have received userID: %v", userID, c.testResponses.recponseEvent.Item.UserId)
 	}
 
 	if title != c.testResponses.recponseEvent.Item.Title {
-		return errors.Errorf("Expected userID: %v, have receive userID: %v", title, c.testResponses.recponseEvent.Item.Title)
+		return errors.Errorf("Expected userID: %v, have received userID: %v", title, c.testResponses.recponseEvent.Item.Title)
 	}
 
 	if description != c.testResponses.recponseEvent.Item.Description {
-		return errors.Errorf("Expected userID: %v, have receive userID: %v", description, c.testResponses.recponseEvent.Item.Description)
+		return errors.Errorf("Expected userID: %v, have received userID: %v", description, c.testResponses.recponseEvent.Item.Description)
 	}
 
 	return nil
@@ -212,7 +215,7 @@ func (c *calendarTest) iCreateEventWithUserIDTitle(userID int, title string) err
 
 func (c *calendarTest) iReceiveStatusIsNotOK() error {
 	if c.testResponses.recponseEvent.Status.OK {
-		return errors.Errorf("Expected status is not OK, have receive status: %v", c.testResponses.recponseEvent.Status)
+		return errors.Errorf("Expected status is not OK, have received status: %v", c.testResponses.recponseEvent.Status)
 	}
 	return nil
 }
@@ -238,34 +241,120 @@ func (c *calendarTest) iCreateEventOnANextDay() error {
 }
 
 func (c *calendarTest) iSendRequestForAListOfEventsOnADay() error {
+	response, err := c.GRPCClient.EventListOnDay(c.ctx, ptypes.TimestampNow())
+	if err != nil {
+		return err
+	}
+	c.testResponses.recponseEvents = response
+
 	return nil
 }
 
-func (c *calendarTest) iReceiveListOfEventsWithLength(arg1 int) error {
+func (c *calendarTest) iReceiveListOfEventsWithLength(length int) error {
+	if len(c.testResponses.recponseEvents.List) != length {
+		return errors.Errorf("Expected length %v, have received lehgth: %v", length, len(c.testResponses.recponseEvents.List))
+	}
 	return nil
 }
 
 func (c *calendarTest) iCreateEventOnASecondDay() error {
+	event := event.Event{
+		UserID:       uint(userID),
+		Title:        "EventOnASecondDay",
+		Time:         time.Now().AddDate(0, 0, 2),
+	}
+	e, err := controller.EventToEventProto(event)
+	if err != nil {
+		return err
+	}
+
+	response, err := c.GRPCClient.EventCreate(c.ctx, e)
+	if err != nil {
+		return err
+	}
+	c.testResponses.recponseEvent = response
+
 	return nil
 }
 
 func (c *calendarTest) iSendRequestForAListOfEventsOnAWeek() error {
+	var length = 2
+
+	response, err := c.GRPCClient.EventListOnWeek(c.ctx, ptypes.TimestampNow())
+	if err != nil {
+		return err
+	}
+
+	if len(response.List) != length {
+		return errors.Errorf("Expected length %v, have received lehgth: %v", length, len(response.List))
+	}
+
 	return nil
 }
 
 func (c *calendarTest) iCreateEventOnASecondWeek() error {
+	event := event.Event{
+		UserID:       uint(userID),
+		Title:        "EventOnASecondWeek",
+		Time:         time.Now().AddDate(0, 0, 9),
+	}
+	e, err := controller.EventToEventProto(event)
+	if err != nil {
+		return err
+	}
+
+	response, err := c.GRPCClient.EventCreate(c.ctx, e)
+	if err != nil {
+		return err
+	}
+	c.testResponses.recponseEvent = response
+
 	return nil
 }
 
 func (c *calendarTest) iSendRequestForAListOfEventsOnAMonth() error {
+	var length = 2
+
+	response, err := c.GRPCClient.EventListOnMonth(c.ctx, ptypes.TimestampNow())
+	if err != nil {
+		return err
+	}
+
+	if len(response.List) != length {
+		return errors.Errorf("Expected length %v, have received lehgth: %v", length, len(response.List))
+	}
+
 	return nil
 }
 
-func (c *calendarTest) iCreateEventOnANextDayWithDurationInDayAndTitle(arg1 string) error {
+func (c *calendarTest) iCreateEventOnANextDayWithDurationInDayAndTitle(title string) error {
+	event := event.Event{
+		UserID:     uint(userID),
+		Title:      title,
+		Duration:	25 * time.Hour,
+		Time:       time.Now().AddDate(0, 0, 1),
+	}
+	e, err := controller.EventToEventProto(event)
+	if err != nil {
+		return err
+	}
+
+	response, err := c.GRPCClient.EventCreate(c.ctx, e)
+	if err != nil {
+		return err
+	}
+	c.testResponses.recponseEvent = response
+
 	return nil
 }
 
-func (c *calendarTest) iReceiveNotificationWithIDAndTitle(arg1 string) error {
+func (c *calendarTest) iReceiveNotificationWithIDAndTitle(title string) error {
+	n := <- c.queueCh
+
+	if n.Title != title {
+		return errors.Errorf("Expected title of notice: %q, have received title: %q", title, n.Title)
+	}
+
 	return nil
 }
 
