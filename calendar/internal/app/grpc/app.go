@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
 
@@ -36,7 +35,7 @@ func New(commonApp *commonApp.App, cfg config.Configuration) *App {
 		Logger:			app.Logger,
 	}
 
-	reflection.Register(app.Server)
+	//reflection.Register(app.Server)	//	optional
 	calendarpb.RegisterCalendarServer(app.Server, c)
 
 	return app

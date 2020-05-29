@@ -43,7 +43,8 @@ type DB struct {
 
 // Queue is a config for a queue
 type Queue struct {
-	RabbitMQ	RabbitMQ
+	RabbitMQ					RabbitMQ
+	RabbitMQUserNotification	RabbitMQ
 }
 
 // RabbitMQ is a config for a connection to a RabbitMQ host

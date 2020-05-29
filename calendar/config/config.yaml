@@ -23,6 +23,13 @@ queue:
     exchange_type:  ""
     queue:          "calendar.Notice"
     binding_key:    "calendar.Notice"
+  rabbitmqusernotification:
+    consumer_tag:   "notificationSender"
+    uri:            "amqp://guest:guest@queue:5672"
+    exchange_name:  "calendar.UserNotice"
+    exchange_type:  ""
+    queue:          "calendar.UserNotice"
+    binding_key:    "calendar.UserNotice"
 
 jwt_signing_key: "LxsKJywDL5O5PvgODZhBH12KE6k2yL8E"
 jwt_expiration: 72

@@ -19,10 +19,11 @@ import (
 // App is the application for CLI app
 type App struct {
 	*commonApp.App
-	Ctx                    context.Context
-	cancel                 context.CancelFunc
-	Queue                  rabbitmq.QueueClient
-	NotificationController *controller.NotificationController
+	Ctx                    	context.Context
+	cancel                 	context.CancelFunc
+	Queue                  	rabbitmq.QueueClient
+	QueueUserNotification	rabbitmq.QueueClient
+	NotificationController 	*controller.NotificationController
 }
 
 // New func is a constructor for the App
@@ -33,11 +34,17 @@ func New(ctx context.Context, commonApp *commonApp.App, cfg config.Configuration
 		panic(errors.Wrap(err, "can not connect to queue"))
 	}
 
+	queueUserNotification, err := rabbitmq.NewClient(ctx, commonApp.Logger, cfg.Queue.RabbitMQUserNotification, rabbitmq.TypePublisher)
+	if err != nil {
+		panic(errors.Wrap(err, "can not connect to queue"))
+	}
+
 	app := &App{
 		App:                    commonApp,
 		Ctx:                    ctx,
 		cancel:                 cancel,
 		Queue:                  queue,
+		QueueUserNotification:	queueUserNotification,
 		NotificationController: controller.NewNotificationController(ctx, commonApp.Domain.Event.Service, commonApp.Logger, queue),
 	}
 
@@ -68,7 +75,7 @@ OUTER:
 			if ok == false {
 				break OUTER
 			}
-			app.NotificationController.Send(n)
+			app.NotificationController.Send(app.QueueUserNotification, n)
 		}
 	}
 

@@ -79,13 +79,9 @@ func (c *NotificationController) Schedule() error {
 	}
 	// В цикле записать в очередь
 	for _, n := range items{
-		s, err := json.Marshal(n)
+		err = c.publish(c.queue, *n)
 		if err != nil {
-			return errors.Wrapf(err, "can not marshal a value: %v", n)
-		}
-		err = c.queue.Publish(s)
-		if err != nil {
-			return errors.Wrapf(err, "can not publish a value: %v", s)
+			return err
 		}
 	}
 
@@ -93,13 +89,29 @@ func (c *NotificationController) Schedule() error {
 }
 
 // Send is sends Notification obj
-func (c *NotificationController) Send(n notification.Notification) {
+func (c *NotificationController) Send(uq rabbitmq.QueueClient, n notification.Notification) error {
 	b, err := json.Marshal(n)
 	if err != nil {
-		c.Logger.Errorf("can not send, Marshal error: %v", err)
+		return errors.Wrapf(err, "can not marshal a notification: %v", n)
 	}
 	// "send" the message
+	err = c.publish(uq, n)
+	if err != nil {
+		return err
+	}
 	c.Logger.Debugf(" [ <- q] Sent notification to user: %s", string(b))
+	return nil
 }
 
+func (c *NotificationController) publish(q rabbitmq.QueueClient, n notification.Notification) error {
+	s, err := json.Marshal(n)
+	if err != nil {
+		return errors.Wrapf(err, "can not marshal a value: %v", n)
+	}
+	err = c.queue.Publish(s)
+	if err != nil {
+		return errors.Wrapf(err, "can not publish a value: %v", s)
+	}
+	return nil
+}
 
