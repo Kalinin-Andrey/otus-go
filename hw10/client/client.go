@@ -95,7 +95,7 @@ func (c *client) Stop() {
 	c.sincStop <- struct{}{}
 }
 
-// readRoutine func is read from conn and write to out
+// readRoutine func reads from conn and writes to out
 func (c *client) readRoutine() {
 	scanner := bufio.NewScanner(c.conn)
 OUTER:
@@ -119,7 +119,7 @@ OUTER:
 	log.Printf("ReadRoutine has finished\n")
 }
 
-// writeRoutine ir read from in and write in conn
+// writeRoutine func reads from in and writes in conn
 func (c *client) writeRoutine() {
 	scanner := bufio.NewScanner(c.in)
 OUTER:
@@ -133,10 +133,14 @@ OUTER:
 				break OUTER
 			}
 			s := scanner.Text()
-			c.conn.Write([]byte(s + "\n"))
+			_, err := c.conn.Write([]byte(s + "\n"))
 
-			if err := scanner.Err(); err != nil {
-				log.Printf("WriteRoutine: error happend: %v\n", err)
+			if err != nil {
+				log.Printf("GRPC write error: %v\n", err)
+			}
+
+			if err = scanner.Err(); err != nil {
+				log.Printf("Scanner error: %v\n", err)
 			}
 		}
 

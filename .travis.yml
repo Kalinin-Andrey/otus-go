@@ -1,0 +1,17 @@
+
+git:
+  depth: 3
+
+# safelist
+branches:
+  only:
+    - master
+    - develop
+
+language: go
+  go:
+    - "1.14"
+
+script:
+
+
