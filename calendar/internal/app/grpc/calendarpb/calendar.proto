@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package calendar;
 
-option go_package = "calendarpb";
+option go_package = ".;calendarpb";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
@@ -45,6 +45,7 @@ message Event {
     google.protobuf.Timestamp time          = 5;
     google.protobuf.Duration duration       = 6;
     google.protobuf.Duration notice_period  = 7;
+    google.protobuf.Timestamp notice_time   = 8;
 }
 
 message Notification {

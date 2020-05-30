@@ -33,6 +33,8 @@ type IService interface {
 	Delete(ctx context.Context, id uint) (error)
 	// NotificationsList returns a list of notification.
 	NotificationsList(ctx context.Context) ([]*notification.Notification, error)
+	// SetHadNoticed set event had noticed
+	SetHadNoticed(ctx context.Context, id uint) error
 }
 
 type service struct {
@@ -143,5 +145,10 @@ func (s service) NotificationsForEvents(eList []Event) []*notification.Notificat
 	}
 
 	return nList
+}
+
+// SetHadNoticed set event had noticed
+func (s service) SetHadNoticed(ctx context.Context, id uint) error {
+	return s.repo.SetHadNoticed(ctx, id)
 }
 

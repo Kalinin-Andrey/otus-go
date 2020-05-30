@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
 // Event entity
@@ -20,6 +19,7 @@ type Event struct {
 	Time			time.Time
 	Duration		time.Duration			`json:"duration"`
 	NoticePeriod	*time.Duration			`db:"notice_period" json:"noticePeriod,omitempty"`
+	NoticeTime		*time.Time				`db:"notice_time" json:"noticeTime"`
 }
 
 const (
@@ -44,7 +44,7 @@ type WhereConditionTime struct {
 func (e Event) Validate() error {
 
 	return validation.ValidateStruct(&e,
-		validation.Field(&e.Title, validation.Required, validation.Length(2, 100), is.PrintableASCII),
+		validation.Field(&e.Title, validation.Required, validation.Length(2, 100)),
 	)
 }
 
@@ -72,6 +72,7 @@ func (e *Event) UnmarshalJSON(data []byte) (err error) {
 		Time			string
 		Duration		string
 		NoticePeriod	*string
+		NoticeTime		*string
 	}
 	if err = json.Unmarshal(data, &tmp); err != nil {
 		return err

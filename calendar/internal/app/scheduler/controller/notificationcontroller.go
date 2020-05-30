@@ -73,13 +73,17 @@ func (c *NotificationController) Schedule() error {
 			c.Logger.Info(err)
 			return nil
 		}
-		err = errors.Wrapf(err, "Schedule receive error from EventService.ListForNotification: %q", err)
+		err = errors.Wrapf(err, "Schedule receive error from EventService.NotificationsList: %q", err)
 		c.Logger.Error(err)
 		return err
 	}
 	// В цикле записать в очередь
 	for _, n := range items{
 		err = c.publish(c.queue, *n)
+		if err != nil {
+			return err
+		}
+		err = c.EventService.SetHadNoticed(c.ctx, n.EventID)
 		if err != nil {
 			return err
 		}

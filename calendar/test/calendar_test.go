@@ -12,8 +12,6 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
-
 	"github.com/pkg/errors"
 
 	"github.com/cucumber/godog"
@@ -47,11 +45,13 @@ var GRPCAddress	= os.Getenv("TESTS_GRPC_ADDRESS")
 
 func init() {
 	if amqpDSN == "" {
-		amqpDSN = "amqp://guest:guest@queue:5672"
+		//amqpDSN = "amqp://guest:guest@queue:5672"
+		amqpDSN = "amqp://guest:guest@localhost:5672"
 	}
 
 	if GRPCAddress == "" {
-		GRPCAddress = "grpcapi:8882"
+		//GRPCAddress = "grpcapi:8888"
+		GRPCAddress = "localhost:8888"
 	}
 }
 
@@ -73,6 +73,7 @@ type testResponses struct {
 }
 
 func newCalendarTest(ctx context.Context) *calendarTest {
+	os.Chdir("../")
 	cfg, err := config.Get()
 	if err != nil {
 		golog.Fatalf("Can not load the config, error: %v", err)
@@ -84,6 +85,7 @@ func newCalendarTest(ctx context.Context) *calendarTest {
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
+	cfg.Queue.RabbitMQUserNotification.URI = amqpDSN
 	queue, err := rabbitmq.NewClient(ctx, logger, cfg.Queue.RabbitMQUserNotification, rabbitmq.TypePublisher)
 
 	ct := &calendarTest{
@@ -135,7 +137,6 @@ func (c *calendarTest) start(*messages.Pickle) {
 func (c *calendarTest) stop(*messages.Pickle, error) {
 	c.cancel()
 	c.queue.Close()
-	close(c.queueCh)
 }
 
 
@@ -197,7 +198,7 @@ func (c *calendarTest) iCreateEventWithUserIDTitle(userID int, title string) err
 	event := event.Event{
 		UserID:       uint(userID),
 		Title:        title,
-		Time:         time.Now().AddDate(1, 1, 0),
+		Time:         time.Now().AddDate(1, 0, 1),
 	}
 	e, err := controller.EventToEventProto(event)
 	if err != nil {

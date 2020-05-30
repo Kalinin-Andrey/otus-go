@@ -30,6 +30,7 @@ func (c EventController) EventCreate(ctx context.Context, entityProto *calendarp
 
 	entity, err := EventProtoToEvent(*entityProto)
 	if err != nil {
+		c.Logger.With(ctx).Info(err)
 		return grpcerror.ErrBadRequestResponseEvent, apperror.ErrBadRequest
 	}
 
@@ -45,6 +46,7 @@ func (c EventController) EventCreate(ctx context.Context, entityProto *calendarp
 
 	entityProto, err = EventToEventProto(*entity)
 	if err != nil {
+		c.Logger.With(ctx).Info(err)
 		return grpcerror.ErrInternalResponseEvent, apperror.ErrInternal
 	}
 
@@ -60,6 +62,7 @@ func (c EventController) EventUpdate(ctx context.Context, entityProto *calendarp
 
 	entity, err := EventProtoToEvent(*entityProto)
 	if err != nil {
+		c.Logger.With(ctx).Info(err)
 		return grpcerror.ErrBadRequestResponseEvent, apperror.ErrBadRequest
 	}
 
@@ -75,6 +78,7 @@ func (c EventController) EventUpdate(ctx context.Context, entityProto *calendarp
 
 	entityProto, err = EventToEventProto(*entity)
 	if err != nil {
+		c.Logger.With(ctx).Info(err)
 		return grpcerror.ErrInternalResponseEvent, apperror.ErrInternal
 	}
 
@@ -103,6 +107,7 @@ func (c EventController) EventDelete(ctx context.Context, idProto *calendarpb.Ev
 func (c EventController) EventListOnDay(ctx context.Context, ts *timestamp.Timestamp) (*calendarpb.ResponseEvents, error) {
 	t, err := ptypes.Timestamp(ts)
 	if err != nil {
+		c.Logger.With(ctx).Info(err)
 		return grpcerror.ErrBadRequestResponseEvents, apperror.ErrBadRequest
 	}
 	return c.listFromTill(ctx, t, t.AddDate(0, 0, 1))
@@ -112,6 +117,7 @@ func (c EventController) EventListOnDay(ctx context.Context, ts *timestamp.Times
 func (c EventController) EventListOnWeek(ctx context.Context, ts *timestamp.Timestamp) (*calendarpb.ResponseEvents, error) {
 	t, err := ptypes.Timestamp(ts)
 	if err != nil {
+		c.Logger.With(ctx).Info(err)
 		return grpcerror.ErrBadRequestResponseEvents, apperror.ErrBadRequest
 	}
 	return c.listFromTill(ctx, t, t.AddDate(0, 0, 7))
@@ -121,6 +127,7 @@ func (c EventController) EventListOnWeek(ctx context.Context, ts *timestamp.Time
 func (c EventController) EventListOnMonth(ctx context.Context, ts *timestamp.Timestamp) (*calendarpb.ResponseEvents, error) {
 	t, err := ptypes.Timestamp(ts)
 	if err != nil {
+		c.Logger.With(ctx).Info(err)
 		return grpcerror.ErrBadRequestResponseEvents, apperror.ErrBadRequest
 	}
 	return c.listFromTill(ctx, t, t.AddDate(0, 1, 0))

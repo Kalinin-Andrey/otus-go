@@ -20,5 +20,7 @@ type IRepository interface {
 	Delete(ctx context.Context, id uint) error
 	// ListForNotifications returns list of events for notification
 	ListForNotifications(ctx context.Context, offset, limit uint) ([]Event, error)
+	// SetHadNoticed set event had noticed
+	SetHadNoticed(ctx context.Context, id uint) error
 }
 

@@ -97,12 +97,21 @@ func (r EventRepository) ListForNotifications(ctx context.Context, offset, limit
 	var items []event.Event
 
 	// Now() >= e.Time - e.NoticePeriod
-	err := r.db.DB().SelectContext(ctx, &items, "SELECT * FROM event WHERE \"time\" -  make_interval(0, 0, 0, 0, 0, 0, notice_period / 1000000000) <= now()")
+	err := r.db.DB().SelectContext(ctx, &items, "SELECT * FROM event WHERE notice_time IS NULL AND \"time\" -  make_interval(0, 0, 0, 0, 0, 0, notice_period / 1000000000) <= now()")
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return items, apperror.ErrNotFound
 		}
 	}
 	return items, err
+}
+
+// SetHadNoticed set event had noticed
+func (r EventRepository) SetHadNoticed(ctx context.Context, id uint) error {
+	_, err := r.db.DB().ExecContext(ctx, "UPDATE event SET notice_time = NOW() WHERE id = $1", id)
+	if err != nil {
+		return errors.Wrapf(err, "EventRepository.SetHadNoticed error: updating record id = %v", id)
+	}
+	return nil
 }
 
