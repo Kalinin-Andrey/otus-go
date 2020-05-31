@@ -30,9 +30,9 @@ type Configuration struct {
 // Log is a config for a logger
 type Log struct {
 	Encoding		string
-	OutputPaths		[]string		`config:"outputPaths"`
+	OutputPaths		[]string		`config:"outputpaths"`
 	Level			string
-	InitialFields	map[string]interface{}	`config:"initialFields"`
+	InitialFields	map[string]interface{}	`config:"initialfields"`
 }
 
 // DB is a config for a DB connection
@@ -71,12 +71,19 @@ var config Configuration = Configuration{
 func Get() (*Configuration, error) {
 	flag.StringVar(&pathToConfig, "config", defaultPathToConfig, "path to YAML/JSON config file")
 	flag.Parse()
+	ctx := context.Background()
 
 	loader := confita.NewLoader(
 		file.NewBackend(pathToConfig),
 		env.NewBackend(),
-		flags.NewBackend(),
 	)
-	err := loader.Load(context.Background(), &config)
+
+	err := loader.Load(ctx, &config)
+	if err != nil {
+		return nil, err
+	}
+
+	err = confita.NewLoader(flags.NewBackend()).Load(ctx, &config)
+
 	return &config, err
 }

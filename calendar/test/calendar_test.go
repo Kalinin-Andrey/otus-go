@@ -3,22 +3,20 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/app/grpc/calendarpb"
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/app/grpc/controller"
+	"github.com/golang/protobuf/ptypes"
+	"github.com/pkg/errors"
 	"github.com/streadway/amqp"
 	"google.golang.org/grpc"
 	golog "log"
 	"os"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
-	"github.com/pkg/errors"
-
-	"github.com/cucumber/godog"
-	"github.com/cucumber/messages-go/v10"
-
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/config"
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/log"
+	"github.com/cucumber/godog"
 
 	"github.com/Kalinin-Andrey/otus-go/calendar/internal/pkg/rabbitmq"
 
@@ -51,7 +49,7 @@ func init() {
 
 	if GRPCAddress == "" {
 		//GRPCAddress = "grpcapi:8888"
-		GRPCAddress = "localhost:8888"
+		GRPCAddress = "localhost:8882"
 	}
 }
 
@@ -70,6 +68,7 @@ type calendarTest struct {
 type testResponses struct {
 	recponseEvent		*calendarpb.ResponseEvent
 	recponseEvents		*calendarpb.ResponseEvents
+	error				error
 }
 
 func newCalendarTest(ctx context.Context) *calendarTest {
@@ -130,11 +129,11 @@ func (c *calendarTest) deliveryToNotification(d amqp.Delivery) notification.Noti
 
 
 
-func (c *calendarTest) start(*messages.Pickle) {
-
+func (c *calendarTest) start() {
+	fmt.Println("Start test!")
 }
 
-func (c *calendarTest) stop(*messages.Pickle, error) {
+func (c *calendarTest) stop() {
 	c.cancel()
 	c.queue.Close()
 }
@@ -205,18 +204,17 @@ func (c *calendarTest) iCreateEventWithUserIDTitle(userID int, title string) err
 		return err
 	}
 
-	response, err := c.GRPCClient.EventCreate(c.ctx, e)
+	_, err = c.GRPCClient.EventCreate(c.ctx, e)
 	if err != nil {
-		return err
+		c.testResponses.error = err
 	}
-	c.testResponses.recponseEvent = response
 
 	return nil
 }
 
 func (c *calendarTest) iReceiveStatusIsNotOK() error {
-	if c.testResponses.recponseEvent.Status.OK {
-		return errors.Errorf("Expected status is not OK, have received status: %v", c.testResponses.recponseEvent.Status)
+	if c.testResponses.error == nil {
+		return errors.Errorf("Expected error, have received error = nil")
 	}
 	return nil
 }
@@ -251,7 +249,8 @@ func (c *calendarTest) iSendRequestForAListOfEventsOnADay() error {
 	return nil
 }
 
-func (c *calendarTest) iReceiveListOfEventsWithLength(length int) error {
+func (c *calendarTest) iReceiveListOfEventsWithLengthEqualToOne() error {
+	length := 1
 	if len(c.testResponses.recponseEvents.List) != length {
 		return errors.Errorf("Expected length %v, have received lehgth: %v", length, len(c.testResponses.recponseEvents.List))
 	}
@@ -279,17 +278,21 @@ func (c *calendarTest) iCreateEventOnASecondDay() error {
 }
 
 func (c *calendarTest) iSendRequestForAListOfEventsOnAWeek() error {
-	var length = 2
-
 	response, err := c.GRPCClient.EventListOnWeek(c.ctx, ptypes.TimestampNow())
 	if err != nil {
 		return err
 	}
 
-	if len(response.List) != length {
-		return errors.Errorf("Expected length %v, have received lehgth: %v", length, len(response.List))
-	}
+	c.testResponses.recponseEvents = response
 
+	return nil
+}
+
+func (c *calendarTest) iReceiveListOfEventsWithLengthEqualToTwo() error {
+	length := 2
+	if len(c.testResponses.recponseEvents.List) != length {
+		return errors.Errorf("Expected length %v, have received lehgth: %v", length, len(c.testResponses.recponseEvents.List))
+	}
 	return nil
 }
 
@@ -314,17 +317,21 @@ func (c *calendarTest) iCreateEventOnASecondWeek() error {
 }
 
 func (c *calendarTest) iSendRequestForAListOfEventsOnAMonth() error {
-	var length = 2
-
 	response, err := c.GRPCClient.EventListOnMonth(c.ctx, ptypes.TimestampNow())
 	if err != nil {
 		return err
 	}
 
-	if len(response.List) != length {
-		return errors.Errorf("Expected length %v, have received lehgth: %v", length, len(response.List))
-	}
+	c.testResponses.recponseEvents = response
 
+	return nil
+}
+
+func (c *calendarTest) iReceiveListOfEventsWithLengthEqualToThree() error {
+	length := 3
+	if len(c.testResponses.recponseEvents.List) != length {
+		return errors.Errorf("Expected length %v, have received lehgth: %v", length, len(c.testResponses.recponseEvents.List))
+	}
 	return nil
 }
 
@@ -362,7 +369,7 @@ func (c *calendarTest) iReceiveNotificationWithIDAndTitle(title string) error {
 func FeatureContext(s *godog.Suite) {
 	c := newCalendarTest(context.Background())
 
-	s.BeforeScenario(c.start)
+	s.BeforeSuite(c.start)
 
 	s.Step(`^I create event with UserID=(\d+), Title="([^"]*)", Description="([^"]*)"$`, c.iCreateEventWithUserIDTitleDescription)
 	s.Step(`^I receive status is OK$`, c.iReceiveStatusIsOK)
@@ -371,15 +378,17 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^I receive status is not OK$`, c.iReceiveStatusIsNotOK)
 	s.Step(`^I create event on a next day$`, c.iCreateEventOnANextDay)
 	s.Step(`^I send request for a list of events on a day$`, c.iSendRequestForAListOfEventsOnADay)
-	s.Step(`^I receive list of events with length=(\d+)$`, c.iReceiveListOfEventsWithLength)
+	s.Step(`^I receive list of events with length  equal to one$`, c.iReceiveListOfEventsWithLengthEqualToOne)
 	s.Step(`^I create event on a second day$`, c.iCreateEventOnASecondDay)
 	s.Step(`^I send request for a list of events on a week$`, c.iSendRequestForAListOfEventsOnAWeek)
+	s.Step(`^I receive list of events with length  equal to two$`, c.iReceiveListOfEventsWithLengthEqualToTwo)
 	s.Step(`^I create event on a second week$`, c.iCreateEventOnASecondWeek)
 	s.Step(`^I send request for a list of events on a month$`, c.iSendRequestForAListOfEventsOnAMonth)
+	s.Step(`^I receive list of events with length  equal to three$`, c.iReceiveListOfEventsWithLengthEqualToThree)
 	s.Step(`^I create event on a next day with duration in day and Title="([^"]*)",$`, c.iCreateEventOnANextDayWithDurationInDayAndTitle)
 	s.Step(`^I receive notification with ID and Title="([^"]*)"$`, c.iReceiveNotificationWithIDAndTitle)
 
-	s.AfterScenario(c.stop)
+	s.AfterSuite(c.stop)
 
 }
 

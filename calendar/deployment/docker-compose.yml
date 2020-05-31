@@ -65,7 +65,7 @@ services:
         expose:
             - "8882"
         ports:
-            - "8888:8882"
+            - "8882:8882"
         restart: always
 
     scheduler:
