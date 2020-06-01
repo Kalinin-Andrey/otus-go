@@ -251,7 +251,7 @@ func (c *Client) Publish(body []byte) error {
 	if err != nil {
 		return errors.Wrapf(err, "Failed to publish a message")
 	}
-	c.logger.Debugf(" [q <- ] Sent to queue %s", body)
+	c.logger.Debugf(" [q <- ] Sent to queue %s message %s", c.queue, body)
 	return nil
 }
 

@@ -112,7 +112,7 @@ func (c *NotificationController) publish(q rabbitmq.QueueClient, n notification.
 	if err != nil {
 		return errors.Wrapf(err, "can not marshal a value: %v", n)
 	}
-	err = c.queue.Publish(s)
+	err = q.Publish(s)
 	if err != nil {
 		return errors.Wrapf(err, "can not publish a value: %v", s)
 	}

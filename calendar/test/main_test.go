@@ -9,7 +9,7 @@ import (
 	"github.com/cucumber/godog"
 )
 
-const delay = 5 * time.Second
+const delay = 10 * time.Second
 
 func TestMain(m *testing.M) {
 	log.Printf("wait %s for service availability...", delay)
@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 		FeatureContext(s)
 	}, godog.Options{
 		Format:    "progress", // Замените на "pretty" для лучшего вывода
-		Paths:     []string{"features"},
+		Paths:     []string{"test/features"},
 		Randomize: 0, // Последовательный порядок исполнения
 	})
 

@@ -72,7 +72,7 @@ type testResponses struct {
 }
 
 func newCalendarTest(ctx context.Context) *calendarTest {
-	os.Chdir("../")
+	//os.Chdir("../")
 	cfg, err := config.Get()
 	if err != nil {
 		golog.Fatalf("Can not load the config, error: %v", err)
@@ -336,11 +336,13 @@ func (c *calendarTest) iReceiveListOfEventsWithLengthEqualToThree() error {
 }
 
 func (c *calendarTest) iCreateEventOnANextDayWithDurationInDayAndTitle(title string) error {
+	np := 25 * time.Hour
 	event := event.Event{
-		UserID:     uint(userID),
-		Title:      title,
-		Duration:	25 * time.Hour,
-		Time:       time.Now().AddDate(0, 0, 1),
+		UserID:     	uint(userID),
+		Title:      	title,
+		Duration:		time.Hour,
+		NoticePeriod:	&np,
+		Time:       	time.Now().AddDate(0, 0, 1),
 	}
 	e, err := controller.EventToEventProto(event)
 	if err != nil {
@@ -378,13 +380,13 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^I receive status is not OK$`, c.iReceiveStatusIsNotOK)
 	s.Step(`^I create event on a next day$`, c.iCreateEventOnANextDay)
 	s.Step(`^I send request for a list of events on a day$`, c.iSendRequestForAListOfEventsOnADay)
-	s.Step(`^I receive list of events with length  equal to one$`, c.iReceiveListOfEventsWithLengthEqualToOne)
+	s.Step(`^I receive list of events with length equal to one$`, c.iReceiveListOfEventsWithLengthEqualToOne)
 	s.Step(`^I create event on a second day$`, c.iCreateEventOnASecondDay)
 	s.Step(`^I send request for a list of events on a week$`, c.iSendRequestForAListOfEventsOnAWeek)
-	s.Step(`^I receive list of events with length  equal to two$`, c.iReceiveListOfEventsWithLengthEqualToTwo)
+	s.Step(`^I receive list of events with length equal to two$`, c.iReceiveListOfEventsWithLengthEqualToTwo)
 	s.Step(`^I create event on a second week$`, c.iCreateEventOnASecondWeek)
 	s.Step(`^I send request for a list of events on a month$`, c.iSendRequestForAListOfEventsOnAMonth)
-	s.Step(`^I receive list of events with length  equal to three$`, c.iReceiveListOfEventsWithLengthEqualToThree)
+	s.Step(`^I receive list of events with length equal to three$`, c.iReceiveListOfEventsWithLengthEqualToThree)
 	s.Step(`^I create event on a next day with duration in day and Title="([^"]*)",$`, c.iCreateEventOnANextDayWithDurationInDayAndTitle)
 	s.Step(`^I receive notification with ID and Title="([^"]*)"$`, c.iReceiveNotificationWithIDAndTitle)
 

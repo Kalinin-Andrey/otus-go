@@ -2,6 +2,7 @@ package sender
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -75,7 +76,8 @@ OUTER:
 			if ok == false {
 				break OUTER
 			}
-			app.NotificationController.Send(app.QueueUserNotification, n)
+			err := app.NotificationController.Send(app.QueueUserNotification, n)
+			fmt.Printf("Sender error: %v", err)
 		}
 	}
 
