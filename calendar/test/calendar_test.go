@@ -43,13 +43,13 @@ var GRPCAddress	= os.Getenv("TESTS_GRPC_ADDRESS")
 
 func init() {
 	if amqpDSN == "" {
-		//amqpDSN = "amqp://guest:guest@queue:5672"
-		amqpDSN = "amqp://guest:guest@localhost:5672"
+		amqpDSN = "amqp://guest:guest@queue:5672"
+		//amqpDSN = "amqp://guest:guest@localhost:5672"
 	}
 
 	if GRPCAddress == "" {
-		//GRPCAddress = "grpcapi:8882"
-		GRPCAddress = "localhost:8882"
+		GRPCAddress = "grpcapi:8882"
+		//GRPCAddress = "localhost:8882"
 	}
 }
 
