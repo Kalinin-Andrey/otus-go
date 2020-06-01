@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 		FeatureContext(s)
 	}, godog.Options{
 		Format:    "progress", // Замените на "pretty" для лучшего вывода
-		Paths:     []string{"test/features"},
+		Paths:     []string{"features"},
 		Randomize: 0, // Последовательный порядок исполнения
 	})
 

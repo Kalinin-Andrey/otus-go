@@ -10,4 +10,5 @@ COPY . .
 
 RUN go get ./...
 
-CMD ["go test -v ./test/"]
+CMD ["/bin/sh"]
+# CMD ["go test -v ./test/"]

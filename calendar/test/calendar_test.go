@@ -72,7 +72,7 @@ type testResponses struct {
 }
 
 func newCalendarTest(ctx context.Context) *calendarTest {
-	//os.Chdir("../")
+	os.Chdir("../")
 	cfg, err := config.Get()
 	if err != nil {
 		golog.Fatalf("Can not load the config, error: %v", err)
