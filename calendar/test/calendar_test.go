@@ -48,7 +48,7 @@ func init() {
 	}
 
 	if GRPCAddress == "" {
-		//GRPCAddress = "grpcapi:8888"
+		//GRPCAddress = "grpcapi:8882"
 		GRPCAddress = "localhost:8882"
 	}
 }
