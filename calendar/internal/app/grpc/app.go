@@ -1,9 +1,14 @@
 package grpc
 
 import (
+	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 	"log"
 	"net"
+	"net/http"
+
+	"github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/Kalinin-Andrey/otus-go/calendar/pkg/config"
 
@@ -18,15 +23,29 @@ const Version = "1.0.0"
 // App is the application for API
 type App struct {
 	*commonApp.App
-	Server		*grpc.Server
-	Address		string
+	MetricServer	*http.Server
+	Server			*grpc.Server
+	Address			string
+}
+
+// Create a metrics registry.
+var reg = prometheus.NewRegistry()
+
+// Create some standard server metrics.
+var grpcMetrics = grpc_prometheus.NewServerMetrics()
+
+func init() {
+	// Register standard server metrics.
+	reg.MustRegister(grpcMetrics)
 }
 
 // New func is a constructor for the ApiApp
 func New(commonApp *commonApp.App, cfg config.Configuration) *App {
 	app := &App{
 		App:	commonApp,
-		Server:	grpc.NewServer(),
+		Server:	grpc.NewServer(
+			grpc.UnaryInterceptor(grpc_prometheus.UnaryServerInterceptor),
+			),
 		Address: cfg.Server.GRPCListen,
 	}
 
@@ -37,6 +56,15 @@ func New(commonApp *commonApp.App, cfg config.Configuration) *App {
 
 	//reflection.Register(app.Server)	//	optional
 	calendarpb.RegisterCalendarServer(app.Server, c)
+
+	// Initialize all metrics.
+	grpcMetrics.InitializeMetrics(app.Server)
+
+	// Create a HTTP server for prometheus.
+	app.MetricServer = &http.Server{
+		Handler: promhttp.HandlerFor(reg, promhttp.HandlerOpts{}),
+		Addr: cfg.Server.HTTPForPrometheuslisten,
+	}
 
 	return app
 }
@@ -59,6 +87,13 @@ func (app *App) Run() error {
 		log.Fatalf("failed to listen %q, err: %q", app.Address, err)
 	}
 
+	// Start your http server for prometheus.
+	go func() {
+		app.Logger.Infof("HTTP metric server is runnig at %v", app.MetricServer.Addr)
+		if err := app.MetricServer.ListenAndServe(); err != nil {
+			app.Logger.Errorf("Unable to start a http metric server at %v", app.MetricServer.Addr)
+		}
+	}()
 
 	app.Logger.Infof("grpc server %v is running at %v", Version, app.Address)
 

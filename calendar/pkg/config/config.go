@@ -12,8 +12,9 @@ import (
 // Configuration is the struct for app configuration
 type Configuration struct {
 	Server		struct {
-		HTTPListen string			`config:"httplisten"`
-		GRPCListen string			`config:"grpclisten"`
+		HTTPListen              string `config:"httplisten"`
+		GRPCListen              string `config:"grpclisten"`
+		HTTPForPrometheuslisten string `yaml:"http_for_prometheus_listen" config:"http_for_prometheus_listen"`
 	}								`config:"server"`
 	Log			Log					`config:"log"`
 	DB			DB					`config:"db"`

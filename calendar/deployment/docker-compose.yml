@@ -94,4 +94,34 @@ services:
             - queue
         restart: always
 
+    prometheus:
+        container_name: prometheus
+        image:  prom/prometheus
+        volumes:
+            - ./prometheus:/etc/prometheus
+        networks:
+            - backend
+        tty: true
+        depends_on:
+            - db
+            - grpcapi
+        ports:
+            - "9090:9090"
+        restart: always
+
+    pg_exporter:
+        container_name: pg_exporter
+        image:  wrouesnel/postgres_exporter
+        volumes:
+            - ./prometheus:/etc/prometheus
+        networks:
+            - backend
+        tty: true
+        depends_on:
+            - db
+        environment:
+            DATA_SOURCE_NAME: "postgresql://postgres:postgres@db:5432/postgres?sslmode=disable"
+        ports:
+            - "9187:9187"
+        restart: always
 
